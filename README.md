@@ -9,10 +9,10 @@ part that is guided by written instructions.
 ## Sessions
 
 01. [Go Intro](session-01)
-02. [Web Programming in Go](session-02)
-03. [Concurrency](session-03)
-04. [Debugging, Testing, Profiling, Tracing](session-04)
-05. [Maintenance and Deployment](session-05)
+02. Web Programming in Go
+03. Concurrency
+04. Debugging, Testing, Profiling, Tracing
+05. Maintenance and Deployment
 
 
 ## Useful Links
