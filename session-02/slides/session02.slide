@@ -1,0 +1,187 @@
+Scalability of Web Systems
+Web Programming in Go
+20 Sep 2017
+Tags: Go, Programming, Web
+
+Jonathan Fürst
+IT University of Copenhagen
+jonf@itu.dk
+http://jofu.org/
+@jf87
+
+
+* Outline
+
+1. Web Basics Recap
+2. Architectures of Web Systems
+3. Web Services
+
+
+# Philippe
+
+# 1.
+# 3 tier architecture
+# cloning and partitioning for scaling
+
+# 2.
+# (Remote) Procedure Call
+# REST
+# Message Queues
+# gRPC
+# Protocol Buffers
+
+
+* Web Basics
+
+* Web Basics: Web Application
+
+- Client-Server
+- Request-Response
+- HTTP Protocol
+
+.image figures/request_response.png 200 _
+.caption Figure from Go Web Programming
+
+* Web Basics: HTTP Requests
+
+1. Request-line
+2. Zero or more request headers
+3. Empty line
+4. Message body (optional)
+
+    GET /Protocols/rfc2616/rfc2616.html HTTP/1.1
+    Host: www.w3.org
+    User-Agent: Mozilla/5.0
+    (empty line)
+
+
+* Web Basics: HTTP Response
+
+1. Status line
+2. Zero or more response headers
+3. Empty line
+4. Message body (optional)
+
+    200 OK
+    Date: Sat, 22 Nov 2014 12:58:58 GMT
+    Server: Apache/2
+    Last-Modified: Thu, 28 Aug 2014 21:01:33 GMT
+    Content-Length: 33115
+    Content-Type: text/html; charset=iso-8859-1
+    
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/ TR/xhtml1/DTD/xhtml1-strict.dtd"> <html
+    xmlns='http://www.w3.org/1999/ xhtml'> <head><title>Hypertext Transfer
+    Protocol -- HTTP/1.1</title></ head><body>...</body></html>
+
+* Web Basics: URL/URI
+
+- / separates segements in hierarchical path
+- ? starts query
+- & separates key value pairs
+- # separates fragments
+
+e.g., 
+
+    http://sausheong:password@www.example.com/docs/file?name=sausheong&location=singapore#summary
+
+* Web Basics: HTTP/2
+
+- Binary vs. text based
+- Multiplexed: multiple requests, responses per connection
+- Header compression
+- Server can push to client
+- Out of the box support since Go 1.8
+
+.caption More on Go's HTTP/2: [[][https://blog.golang.org/h2push]]
+
+* Web Services Techniques
+
+# * Web Services Techniques
+
+# - RPC, REST, JSON, BJSON, Sockets
+
+* Architectural Styles
+
+*RPC*
+
+- Remote call of functions
+- RPC-based APIs are great for actions (that is, procedures or commands).
+
+
+*REST*
+
+- client-server relationship, data exchange through XML, JSON
+- stateless: not persisting sessions between requests
+- utilize HTTP features whenever possible
+- great for modeling resources/entities, CRUD (create, read, update, delete)
+# your domain (that is, resources or entities), making CRUD (create, read, update, delete) available for all of your data.
+
+*GraphQL*
+
+- query language, specification, and collection of tools
+- operates over a single HTTP endpoint, optimized for performance and flexibility
+
+* Some (opinionated) Format Picks from Big to Small
+
+*XML*
+
+- complex, high overhead, not easily human readable
+
+*JSON*
+
+- easier to parse for both human and machine
+
+*BSON*
+
+- convert JSON strings to binary
+
+*Protocol*Buffers,*Thrift*
+
+- binary, compress integer data, use integer for field names
+- needs generated code do marshall/unmarshall
+
+
+* gRPC
+
+- what is gRPC
+
+
+* REST
+
+- what is REST
+
+* GraphQL
+
+- what is GraphQL
+
+* REST vs. GraphQL
+
+.image figures/rest_vs_graphql.png 400 _
+
+* JSON , bJSON, protocol buffers
+
+blabla
+
+* (Web-)Sockets
+
+blavla
+
+
+* Architectures of Web Systems
+
+* Lets look inside the server
+
+.image figures/request_response.png 250 _
+.caption Figure from Go Web Programming
+
+* Multiplexer, Handlers & Template Engine
+
+
+.image figures/web_application_server.png 550 _
+
+
+
+* Hello Web!
+
+.play code/hello_web.go
