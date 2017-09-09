@@ -1,0 +1,556 @@
+Scalability of Web Systems
+Introduction to Go
+13 Sep 2017
+Tags: Go, Programming, Introduction
+
+Jonathan Fürst
+IT University of Copenhagen
+jonf@itu.dk
+http://jofu.org/
+@jf87
+
+
+* Why Go?
+
+Go is made for Web Systems:
+
+- Strong standard library (networking, encryption...)
+- Web server is core part of standard library
+- Concurrency model (Go Routines, Channels)
+- Toolchain
+- App Engine support
+- It's fun to use :-)
+.image figures/gophercolor.png _ 200
+
+
+* Why Go?
+
+"The Go programming language continues to rise. This month it is at an all time high and enters the top 10..."
+.image figures/tiobe_july_2017.png 400 _
+.link https://www.tiobe.com/tiobe-index/
+
+
+* Go in Production
+
+Companies using Go:
+
+- Google (e.g., dl.google.com, YouTube, Kubernetes, "re-write many C++ backend code to Go")
+- Dropbox (1.4 Mio lines of Go code)
+- Twitter ([[https://blog.twitter.com/engineering/en_us/a/2015/handling-five-billion-sessions-a-day-in-real-time.html][Handling five billion sessions a day – in real time)]]
+- CoreOS (most used language)
+- Gov.uk (REST APIs)
+- Canonical ([[https://github.com/juju/juju][Juju]])
+- [[https://www.docker.com/][Docker]]
+- [[https://github.com/influxdata/influxdb][InfluxDB]] (Time series database)
+
+# Projects using Go:
+
+# - Docker, Kubernetes, Juju, Doozer, InfluxDB...
+
+Many more examples on [[https://github.com/golang/go/wiki/GoUsers][]]
+
+* Outline
+
+1.
+
+- Why Go? ✓
+- What is Go?
+- Language Overview
+- Go Toolchain
+# - Installation & Hello Go
+
+2.
+
+- Hands-On
+
+* What is Go?
+
+* What is Go?
+
+Go is expressive, concise, clean, and efficient. Its *concurrency*mechanisms* 
+make it easy to write programs that get the most out of *multicore*and*networked*machines*, while its novel type system enables flexible and modular program
+construction. Go *compiles*quickly* to machine code yet has the convenience of
+*garbage*collection* and the power of run-time reflection. It's a *fast* ,
+*statically*typed*,*compiled*language*that*feels*like*a*dynamically*typed,*
+*interpreted*language.*
+
+.caption Source: [[https://golang.org][]]
+
+* History
+
+.image figures/go-team.png 300 _
+
+- "The three of us got together and decided that we hated C++."
+
+: Robert Griesemer: V8 javascript engine, PHD at ETHZ
+: Rob Pike: Bell Labs, coding scheme for unicode (utf8), Plan9 (unix successor, distributed OS)
+: Ken Thompson: C (together with Dennis Richie), wrote first Unix version.
+
+* History
+
+- Robert Griesemer, Rob Pike, and Ken Thompson
+
+.image figures/go-team.png 300 _
+
+.caption Ken Thompson on the History of Go: [[http://www.drdobbs.com/open-source/interview-with-ken-thompson/229502480][]]
+.caption Rob Pike on the History of Go: [[https://commandcenter.blogspot.de/2012/06/less-is-exponentially-more.html][]]
+.caption GopherCon 2015: Robert Griesemer - The Evolution of Go: [[https://www.youtube.com/watch?v=0ReKdcpNyQg][]]
+
+* History - Languages at Google
+
+
+Write fast:
+
+- Python, Ruby...
+
+Run fast:
+
+- C/C++, (Java, C#)...
+
+==> Either fast (and fun) to write or fast to execute.
+Why not both together with a fast compilation time?
+
+.image figures/compiling.png 260 _
+
+: Java, C#, complicated, lots of boilerplate code
+: C++, at that time and on Google's servers: compile time of hours
+
+
+* General Observations
+
+- Manual memory management is a security risk
+- People want static type checking
+- Inheritance doesn't scale
+- Languages become products in the long run
+- CPUs are shipping with more and more cores
+
+
+: static typed checking: can get rid of a bunch of errors already at compile time and remove from runtime
+: inheritance: opinionated, inheritance trees grow exponentionally, hard to maintain
+: new features with every release (more and more complexity)
+
+
+* Systems at Google
+- Web systems everywhere
+- Many distributed, networked systems
+- Concurrent/Parallel Processing
+- Large code bases on which big teams work on
+
+
+* Design Goals
+
+- (Networked) System programming.
+- Clean, small, compilled language with modern features.
+- Less is exponentially more => Simplicity (e.g., only 25 keywords).
+- Easier to write, easier to read, easier to understand, easier to maintain.
+- Write big programs, written and maintained by big teams.
+
+
+: Modern features like modules, packages, closures
+: Simple compared to C++ (more than 1000 pages spec)
+
+* Guiding Principle
+
+- Simplicity, safety, and readability are paramount.
+- Striving for orthogonality in design.
+- Minimal: One way to write a piece of code.
+- It's about *expressing*algorithms*, not the type system.
+- Collective unconcious history of programming languages.
+
+: Safety = memmory safety
+: orthogonal features don't interfer with each other and are easily combined.
+
+=> Go takes ideas from Pascal, C, Oberon, Python...
+
+.caption Further Read: [[http://dl.acm.org/citation.cfm?id=892013][Hints on programming language design, C.A.R. Hoare]]
+.caption Slide adapted from Robert Griesemer.
+
+* The Go Programming Language
+
+
+* The Go Programming Language
+
+- Compiled
+- Statically typed
+- Garbage collected
+- No inheritance
+- Structured (packages)
+- Built-in concurrency
+- Simple, small and speedy
+
+.caption This and some of the following slides adapted from Thomas Wilde.
+
+: compiled: one binary, 11 different platforms, easy deployment
+: types enforced by compiler
+: memory management using garbage collection
+: embedding (composition) instead of inheritance
+: package structured (opposed to C where you can import header file multiple times and need include guard)
+
+
+* There will be types
+
+A basic function:
+
+    func add(a int, b int) int {
+        return a + b
+    }
+
+Types are written *after* identifiers.
+
+C Code:
+
+    char (*(*x())[])()
+
+"declare x as function returning pointer to array of pointer to function returning char" *
+
+Go Code:
+
+    var x func() *[]func() byte
+
+.caption * http://cdecl.org/
+
+
+* Declare your own types
+
+Basic:
+
+    type MilesPerHour float64
+
+More interesting:
+
+    type Animal struct {
+        Name    string
+        Speed   MilesPerHour
+        Parents [2]Animal
+    }
+
+Even more interesting:
+
+    type Converter interface {
+        Convert([]byte) []byte
+    }
+
+* Predefined types
+
+Inbuilt, named (simple):
+
+- `bool`
+- `byte`, `rune`
+- `string`
+- `error`
+- `float32,` `float64`
+- `int`, `uint`, `uintptr`
+- `int16`, `int32`, `int64`, `int8`, `uint16`, `uint32`, `uint64`, `uint8`
+- `complex128`, `complex64`
+
+.caption we'll look more into `error` later
+
+* Predefined types
+
+Inbuilt, unnamed (composite):
+
+- `*X`
+- `[]X`
+- `[n]X`
+- `map[X]Y`
+- `chan` `X`
+- `struct` `{`X,` `Y,` `...` `}`
+- `func` `(X,` `Y,` `...)` `(Z,` `Q,` `...)`
+- `interface` `{` `M(X)` `Y` ; `N(Z)` `Q` ; `...` `}`
+
+* Maps and slices
+
+Slices are like arrays but grow as needed, bound checked.
+
+    []int
+
+Slice example:
+
+    sc := make([]int, 2)
+    sc[0] = 4
+    sc[1] = 2
+
+Maps are hash-tables (associative arrays)
+
+    map[string]bool
+
+Map example:
+
+    mp := make(map[string]bool)
+    mp["yes"] = true
+    mp["no"] = false
+
+* Named types can have methods
+
+
+    type Person struct {
+        FirstName string
+        LastName  string
+        Age       int
+    }
+
+    func (p Person) FullName() string {
+        return p.FirstName + " " + p.LastName
+    }
+
+Usage example:
+
+    x := Person { "Erlich", "Bachman", 29 }
+
+    n := x.FullName()
+
+    fmt.Println(n) // "Erlich Bachman"
+
+
+* Hello World
+
+.play code/hello.go
+.caption Package fmt implements formatted I/O with functions analogous to C's printf and scanf.
+
+: main is program entry point
+
+* Package Example
+
+E.g., create a package:
+
+    $GOPATH/src/mymath/sqrt.go
+
+.code code/sqrt.go
+
+
+* Package Example
+    
+    $GOPATH/src/hello-app/main.go
+
+And use it in your code:
+
+.code code/hello-sqrt.go
+
+* Explicit Pointers
+
+Go is pass-by-value. We have pointers to pass references.
+
+    p := &s
+
+If `s` was of type `string`, then `p` has type `*string`.
+
+Just like in C, except:
+
+- No pointer arithmetic
+- No casting between pointer types
+- `nil` is well-defined
+- No `->` operator, only `.` (dot)
+
+
+All this results in memory-safe pointers.
+
+
+* Code Re-use
+
+- C-like structs to define objects.
+- Code reuse through interfaces (no subtyping).
+
+.code code/interface_example.go /^type geometry/,/^}/
+
+=> Instead of inheritance, use composition.
+=> Instead of generics, use (narrow) interfaces.
+
+
+* Concurrency
+
+=> Concurrency support was design goal from day one.
+
+1. Goroutines:
+
+- like threads, but use far less memory and require less code to use.
+
+2. Channels:
+
+- data structures that let you send typed messages between goroutines with synchronization built in.
+
+=> programming, concurrency model where you send data between goroutines
+
+Origins:
+
+- [[https://swtch.com/~rsc/thread/newsqueak.pdf][Newsqueak: A Language for Communicating with Mice, Rob Pike, 1994]]
+- [[http://spinroot.com/courses/summer/Papers/hoare_1978.pdf][*Communicating*Sequential*Processes.*C.A.R.*Hoare,*1978*]]
+
+
+* Some Downsides or Peculiarities
+
+Still a relatively new language (2007).
+
+No Generics
+
+Memory Safety and Concurrency
+
+- "Don't communicate by sharing memory, share memory by communicating."
+
+No actual exceptions (just errors and panics).
+
+- Functions return Error value together with potentially other return value(s).
+- Panic and recoveries for exceptional failures.
+
+* Getting Started: Go Toolchain
+
+* Installation
+
+Quickest way:
+
+Download and install latest stable binary from [[https://golang.org/dl/][]]
+(Available for Linux, Mac OS, FreeBSD, Windows).
+
+On Mac OS, with HomeBrew, you can also just do:
+
+    brew install go
+
+If you fancy it, you can also install [[https://golang.org/doc/install/source][from Source.]]
+(Google uses RC versions in their production systems).
+
+* Layers of Go
+
+.image figures/go-layers.png 400 _
+
+: Core : Go is a programming language defined by a specification that can be implemented by any compiler.
+: toolchain for application development (testing, documentation, and formatting..)
+: package management linked with source-control system
+
+.caption Source: Matt Butcher, Matt Farina--Go in Practice
+
+
+
+* Go Tool
+
+    go command [arguments]
+
+
+    build       compile packages and dependencies
+    clean       remove object files
+    doc         show documentation for package or symbol
+    env         print Go environment information
+    bug         start a bug report
+    fix         run go tool fix on packages
+    fmt         run gofmt on package sources
+    generate    generate Go files by processing source
+    get         download and install packages and dependencies
+    install     compile and install packages and dependencies
+    list        list packages
+    run         compile and run Go program
+    test        test packages
+    tool        run specified go tool
+    version     print Go version
+    vet         run go tool vet on packages
+
+
+* go build/install
+
+    go build [-o output] [-i] [build flags] [packages]
+
+Build compiles the packages named by the import paths, along with their dependencies, but it does not install the results.
+
+
+    go install [build flags] [packages]
+
+Install compiles and installs the packages named by the import paths, along with their dependencies.
+
+
+
+* go get
+
+    go get [-d] [-f] [-fix] [-insecure] [-t] [-u] [build flags] [packages]
+
+Get downloads the packages named by the import paths, along with their dependencies. It then installs the named packages, like 'go install'.
+
+
+- use the -u flag to update imported packages and dependencies.
+
+
+* go test
+
+    go test [build/test flags] [packages] [build/test flags & test binary flags]
+
+
+'Go test' automates testing the packages named by the import paths. It prints a summary of the test results in the format:
+
+    ok   archive/tar   0.011s
+    FAIL archive/zip   0.022s
+    ok   compress/gzip 0.033s
+    ...
+
+'Go test' recompiles each package along with any files with names matching the file pattern "*_test.go".
+(Can also contain Benchmarks).
+
+* go fmt/fix
+
+    go fmt
+
+- fmt runs the command 'gofmt -l -w' on the packages named by the import paths. It prints the names of the files that are modified.
+- gofmt formats Go programs. It uses tabs for indentation and blanks for alignment
+
+    go fix
+
+Fix finds Go programs that use old APIs and rewrites them to use newer ones.
+After you update to a new Go release, fix helps make the necessary changes to
+your programs (especially important while language was still fastly evolving).
+
+
+* go doc
+
+Doc prints the documentation comments associated with the item identified by its arguments (a package, const, func, type, var, or method)
+
+e.g.,:
+
+    go doc encoding/json
+
+    package json // import "encoding/json"
+
+    Package json implements encoding and decoding of JSON as defined in RFC
+    4627. The mapping between JSON and Go values is described in the
+    documentation for the Marshal and Unmarshal functions.
+
+    See "JSON and Go" for an introduction to this package:
+    https://golang.org/doc/articles/json_and_go.html
+
+    func Compact(dst *bytes.Buffer, src []byte) error
+    func HTMLEscape(dst *bytes.Buffer, src []byte)
+    func Indent(dst *bytes.Buffer, src []byte, prefix, indent string) error
+    func Marshal(v interface{}) ([]byte, error)
+    func MarshalIndent(v interface{}, prefix, indent string) ([]byte, error)
+    func Unmarshal(data []byte, v interface{}) error
+    ...
+
+* $GOPATH
+
+=> workspace directory that contains all the go code on machine.
+
+    /src    for all source files, including dependencies.
+    /bin    for binaries.
+    /pkg    cache for compiled packages (suffix .a)
+
+- go tool builds source packages and installs binaries to `/pkg` and `/bin`.
+- `/src` contains usually multiple version controlled (Git, Mercurial...) repositories of you and 3rd=party packages.
+
+To set `$GOPATH` manually:
+
+    export GOPATH=${HOME}/mygo
+
+This should not be necessary with newer Go versions (> 1.8). To check your current `$GOPATH`:
+
+    go env GOPATH
+
+
+* Hands On
+
+* Hands On
+
+
+1. Install and Setup Go
+2. Setup your Editor
+3. Hello Go!
+4. Follow the official Go tour
+5. Language Spec and Effective Go
+
+.image figures/gopherswrench.jpg _ 400
+
+
+*Note:* All instructions can be found at [[https://github.com/jf87/scalable_web_systems][https://github.com/jf87/scalable_web_systems]]
