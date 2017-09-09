@@ -36,18 +36,17 @@ Go Web Programming chapter 1 and 2
 2. [Web Servers*](hands-on-02/README.md)
 3. [Input validation and status codes*](hands-on-03/README.md)
 4. [JSON encoding and decoding*](hands-on-04/README.md)
-5. [Data Storage: Postgresql and MongoDB]()
+5. [Data Storage: Postgresql and MongoDB](hands-on-05)
 
 
 ## Hands-on: Part II
 
-1. Deploying to App Engine
-2. Storing data in the Datastore
-3. Retrieving remote resources with urlfetch
+6. [Deploying to App Engine*](hands-on-06)
+7. [Storing data in the Datastore*](hands-on-07)
+8. [Retrieving remote resources with urlfetch*](hands-on-08)
 
 *Based on Francesc's great [go-web-workshop](https://github.com/campoy/go-web-workshop).
 
 
 ## Further Reads
 - https://golang.org/doc/articles/wiki/
-- 
