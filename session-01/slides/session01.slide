@@ -12,7 +12,7 @@ http://jofu.org/
 
 * Why Go?
 
-Go is made for Web Systems:
+Go is made for Web Systems!
 
 - Strong standard library (networking, encryption...)
 - Web server is core part of standard library
@@ -80,17 +80,17 @@ construction. Go *compiles*quickly* to machine code yet has the convenience of
 
 .image figures/go-team.png 300 _
 
-- "The three of us got together and decided that we hated C++."
+- 2007: "The three of us got together and decided that we hated C++."
 
-: Robert Griesemer: V8 javascript engine, PHD at ETHZ
+: Robert Griesemer: V8 javascript engine, PHD at ETHZ with Niklaus Wirth, who invented Pascal
 : Rob Pike: Bell Labs, coding scheme for unicode (utf8), Plan9 (unix successor, distributed OS)
 : Ken Thompson: C (together with Dennis Richie), wrote first Unix version.
 
 * History
 
-- Robert Griesemer, Rob Pike, and Ken Thompson
-
 .image figures/go-team.png 300 _
+
+- Robert Griesemer, Rob Pike, and Ken Thompson
 
 .caption Ken Thompson on the History of Go: [[http://www.drdobbs.com/open-source/interview-with-ken-thompson/229502480][]]
 .caption Rob Pike on the History of Go: [[https://commandcenter.blogspot.de/2012/06/less-is-exponentially-more.html][]]
@@ -134,7 +134,7 @@ Why not both together with a fast compilation time?
 - Web systems everywhere
 - Many distributed, networked systems
 - Concurrent/Parallel Processing
-- Large code bases on which big teams work on
+- Large code bases with big teams working on them
 
 
 * Design Goals
@@ -160,7 +160,7 @@ Why not both together with a fast compilation time?
 : Safety = memmory safety
 : orthogonal features don't interfer with each other and are easily combined.
 
-=> Go takes ideas from Pascal, C, Oberon, Python...
+=> Go takes ideas from Pascal, C, Oberon (Pascal predecessor), Python...
 
 .caption Further Read: [[http://dl.acm.org/citation.cfm?id=892013][Hints on programming language design, C.A.R. Hoare]]
 .caption Slide adapted from Robert Griesemer.
@@ -178,7 +178,7 @@ Why not both together with a fast compilation time?
 - Built-in concurrency
 - Simple, small and speedy
 
-.caption This and some of the following slides adapted from Thomas Wilde.
+.caption This and some of the following slides adapted from [[http://github.com/thwd/google-talk-october-2015/][Thomas Wilde's presentation.]]
 
 : compiled: one binary, 11 different platforms, easy deployment
 : types enforced by compiler
@@ -354,6 +354,52 @@ All this results in memory-safe pointers.
 
 => Instead of inheritance, use composition.
 => Instead of generics, use (narrow) interfaces.
+
+
+* Example
+
+No subtyping on concrete types. All types are invariant.
+
+We use interfaces instead:
+
+    type DatabaseAdapter interface {
+        Connect(Config) error
+        Execute(Query) Result
+        Close()
+    }
+
+`error` is a built-in interface:
+
+    type error interface {
+        Error() string
+    }
+
+Anything that has method called `Error()` returning a string can be used as an `error`.
+
+* Interface implementation is implicit
+
+    type ConnectionError struct{}
+
+    func(e ConnectionError) Error() string {
+        return "there was an error establishing a database connection"
+    }
+
+A `DatabaseAdapter` implementation
+
+    type ExampleAdapter map[Query]Result
+
+    func(a ExampleAdapter) Connect(c Config) error {
+        if a == nil {
+            return ConnectionError{}
+        }
+        return nil
+    }
+
+    func (a ExampleAdapter) Execute(q Query) Result {
+        return a[q]
+    }
+
+    func (a ExampleAdapter) Close() {}
 
 
 * Concurrency
