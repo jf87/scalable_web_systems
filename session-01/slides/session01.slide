@@ -510,6 +510,28 @@ Get downloads the packages named by the import paths, along with their dependenc
 
 - use the -u flag to update imported packages and dependencies.
 
+* Package Example
+
+E.g., create a package:
+
+    $GOPATH/src/mymath/sqrt.go
+
+.code code/sqrt.go
+
+Push it to Github, Bitbucket:
+
+    https://github.com/jf87/mymath
+
+* Package Example
+    
+    $GOPATH/src/hello-app/main.go
+
+And now, other people can use it in their code:
+
+    go get github.com/jf87/mymath
+
+.code code/hello-sqrt-github.go
+
 
 * go test
 
@@ -574,13 +596,14 @@ e.g.,:
     /pkg    cache for compiled packages (suffix .a)
 
 - go tool builds source packages and installs binaries to `/pkg` and `/bin`.
-- `/src` contains usually multiple version controlled (Git, Mercurial...) repositories of you and 3rd=party packages.
+- `/src` contains usually multiple version controlled (Git, Mercurial...) repositories of you and 3rd-party packages.
 
 To set `$GOPATH` manually:
 
     export GOPATH=${HOME}/mygo
 
-This should not be necessary with newer Go versions (> 1.8). To check your current `$GOPATH`:
+This should not be necessary with newer Go versions (> 1.8).
+To check your current `$GOPATH`:
 
     go env GOPATH
 
@@ -588,6 +611,8 @@ This should not be necessary with newer Go versions (> 1.8). To check your curre
 * Hands On
 
 * Hands On
+
+*Note:* All instructions can be found at [[https://github.com/jf87/scalable_web_systems][https://github.com/jf87/scalable_web_systems]]
 
 
 1. Install and Setup Go
@@ -597,6 +622,3 @@ This should not be necessary with newer Go versions (> 1.8). To check your curre
 5. Language Spec and Effective Go
 
 .image figures/gopherswrench.jpg _ 400
-
-
-*Note:* All instructions can be found at [[https://github.com/jf87/scalable_web_systems][https://github.com/jf87/scalable_web_systems]]
