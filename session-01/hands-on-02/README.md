@@ -61,5 +61,6 @@ Another option is to use [vim](http://www.vim.org/) or
    the current file?
 
 
+Move on to the next [section](../session-03).
 
 

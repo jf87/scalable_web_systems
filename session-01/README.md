@@ -1,7 +1,7 @@
 # 01. Go Intro
-This session introduces Go as a programming language for web system
-development. The hands-on focuses on getting Go up and running on your machine
-and teaches you some basics.
+This session introduces Go as programming language for web system development.
+The hands-on focuses on getting Go up and running on your machine and teaches
+you some basics.
 
 ## Outline
 
