@@ -1,10 +1,12 @@
 # Scalability of Web Systems in Go
 
 This workshop is accompanying the "Scalability of Web Systems" course offered
-at the IT University of Copenhagen. Each session consist of of (1) a talk
+at the IT University of Copenhagen. Each session consists of (1) a talk
 introducing the general concept and the Go specific parts and (2) a hands-on
-part that is guided by written instructions.
+(exercise) part that is guided by written instructions and individual support
+by the teachers.
 
+**Feel free to make Pull requests if you find some errors, missing things etc...**
 
 ## Sessions
 
