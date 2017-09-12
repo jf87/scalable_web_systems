@@ -90,4 +90,4 @@ How can you run the present tool from anywhere on the command line without speci
 6. Can you use the go tool to get the repository where this tutorial is hosted (https://github.com/jf87/go-web-workshop)?
 Why not? How can you fix it?
 
-Move on to the next [section](../session-02).
+Move on to the next [section](../hands-on-02).
