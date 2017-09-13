@@ -58,6 +58,20 @@ explicitly. On unix-like systems:
 ```
 export GOPATH=${HOME}/go
 ```
+To persist this for new shell sessions, you probably want to also add this to
+your shell profile. Depending on your shell, this might be `.bashrc`,
+`.profile`, `.zshrc`.
+
+
+On Windows PowerShell, you can set the GOPATH for the current session with:
+```
+$env:GOPATH = "your\path\to\go";
+```
+
+To persist, you can add this line to your profile:
+
+`%UserProfile%\My Documents\WindowsPowerShell\profile.ps1`
+
 
 To check your current `$GOPATH`:
 
