@@ -29,7 +29,7 @@ There are three directories in it:
     $GOPATH/bin    for binaries.
     $GOPATH/pkg    cache for compiled packages (suffix .a)
 
-The `go` tool builds source packages and installs binaries to `\pkg` and
+The `go` command builds source packages and installs binaries to `\pkg` and
 `\bin`. `\src` contains usually multiple version controlled (Git, Mercurial...)
 repositories of you and 3rd=party packages (e.g., dependencies for your
 projects).
@@ -71,9 +71,9 @@ go env GOPATH
 3. What is the purpose of $GOPATH?
 4. Can you have more than one $GOPATH?
 
-## Go Tool
+## Go Command
 
-The `go` tool can do more than just compile your source code.
+The `go` command can do more than just compile your source code.
 Lets survey some of the more important functions:
 
 Use `go help [command]` to understand `build, doc, fmt, get, install, run,
@@ -81,13 +81,13 @@ test`.
 
 ### Questions
 1. What is the difference between `go build, install` and `run`?
-2. Get the present tool from golang.org/x/tools/cmd/present using the go tool.
-What happens when you do that? Can you do the same without using the go tool (if yes, how can you)?
+2. Get the present application from golang.org/x/tools/cmd/present using the go command.
+What happens when you do that? Can you do the same without using the go command (if yes, how can you)?
 3. Can you find where the source code is stored? Where is the binary? Can you run it?
-How can you run the present tool from anywhere on the command line without specifying its absolute path?
-4. How can you update the present tool?
-5. How can you see the documentation of the present tool in the command line? What does the tool do?
-6. Can you use the go tool to get the repository where this tutorial is hosted (https://github.com/jf87/go-web-workshop)?
+How can you run the present application from anywhere on the command line without specifying its absolute path?
+4. How can you update the present application?
+5. How can you see the documentation of the present application in the command line? What does the application do?
+6. Can you use the go command to get the repository where this tutorial is hosted (https://github.com/jf87/go-web-workshop)?
 Why not? How can you fix it?
 
 Move on to the next [section](../hands-on-02).
