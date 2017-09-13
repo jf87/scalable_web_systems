@@ -81,7 +81,7 @@ test`.
 
 ### Questions
 1. What is the difference between `go build, install` and `run`?
-2. Get the present tool from golang.org/x/tools/present using the go tool.
+2. Get the present tool from golang.org/x/tools/cmd/present using the go tool.
 What happens when you do that? Can you do the same without using the go tool (if yes, how can you)?
 3. Can you find where the source code is stored? Where is the binary? Can you run it?
 How can you run the present tool from anywhere on the command line without specifying its absolute path?
