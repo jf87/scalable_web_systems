@@ -12,10 +12,15 @@ http://jofu.org/
 
 * Outline
 
-1. Web Basics Recap
-2. Architectures of Web Systems
-3. Web Services
+1.
 
+- Web Basics
+- Web Services Architectural Styles & Formats
+- Components of Web Systems
+
+2.
+
+- Web Programming Hands-On
 
 # Philippe
 
@@ -40,7 +45,7 @@ http://jofu.org/
 - HTTP Protocol
 
 .image figures/request_response.png 200 _
-.caption Figure from Go Web Programming
+.caption Some figures and content from the following slides from Go Web Programming, by Sau Sheong Chang.
 
 * Web Basics: HTTP Requests
 
@@ -85,21 +90,46 @@ e.g.,
 
     http://sausheong:password@www.example.com/docs/file?name=sausheong&location=singapore#summary
 
+
+* Web Basics: HTTP/1.1
+
+Request-Response protocol:
+
+- Each connection supports pipelining
+- ... but not parallelism (in-order only)
+- Need multiple connections per client-server pair to avoid in-order stalls across multiple requests → multiple CPU-intensive TLS handshakes, higher memory footprint
+
+Content can be compressed, but headers are in text format
+
+Can do single direction streaming, but not bidirectional
+
+    POST /upload HTTP/1.1
+    Host: wwww.example.com
+    Content-Type: application/json
+    Content-Length: 15
+
+    {"msg": "hello!"}
+
+.caption This slide and some of the following adapted from Vijay Pai's [[platformlab.stanford.edu/Seminar%20Talks/gRPC.pdf][slides]].
+
 * Web Basics: HTTP/2
 
 - Binary vs. text based
-- Multiplexed: multiple requests, responses per connection
+- Multiplexed: multiple requests, responses per TCP connection
 - Header compression
 - Server can push to client
 - Out of the box support since Go 1.8
 
 .caption More on Go's HTTP/2: [[][https://blog.golang.org/h2push]]
 
-* Web Services Techniques
+* Web Basics: HTTP/2
 
-# * Web Services Techniques
+.image figures/http2.png 400 _
 
-# - RPC, REST, JSON, BJSON, Sockets
+.link http://www.http2demo.io
+
+
+* Web Services Architectural Styles & Formats
 
 * Architectural Styles
 
@@ -108,79 +138,155 @@ e.g.,
 - Remote call of functions
 - RPC-based APIs are great for actions (that is, procedures or commands).
 
+*HTTP-Based*REST*
 
-*REST*
+- Client-server relationship, data exchange through XML, JSON
+- Stateless: not persisting sessions between requests
+- Utilize HTTP features whenever possible
+- Great for modeling resources/entities, CRUD (create, read, update, delete)
 
-- client-server relationship, data exchange through XML, JSON
-- stateless: not persisting sessions between requests
-- utilize HTTP features whenever possible
-- great for modeling resources/entities, CRUD (create, read, update, delete)
-# your domain (that is, resources or entities), making CRUD (create, read, update, delete) available for all of your data.
+# *GraphQL*
 
-*GraphQL*
+# - query language, specification, and collection of tools
+# - operates over a single HTTP endpoint, optimized for performance and flexibility
 
-- query language, specification, and collection of tools
-- operates over a single HTTP endpoint, optimized for performance and flexibility
+* gRPC
+
+=> open-source, multi-platform RPC framework, many supported languages and activly developed:
+
+- HTTP/2 as transport layer
+- IDL to describe service API
+- Serialization with protobuf (binary data representation)
+- Automatically generates client stubs and abstract server classes in 10+ languages
+
+For more, see Philippe's lecture from 06.09.2017 :-)
+
+
+: HTTP/2:
+: binary framing, header compression
+: bidirectional streams, server push support
+: connection multiplexing across requests and streams
+
+
+# * GraphQL
+
+# - what is GraphQL
+
+# * REST vs. GraphQL
+
+# .image figures/rest_vs_graphql.png 400 _
 
 * Some (opinionated) Format Picks from Big to Small
 
 *XML*
 
-- complex, high overhead, not easily human readable
+- Complex, high overhead, not easily human readable
 
 *JSON*
 
-- easier to parse for both human and machine
+- Simple, easier to parse for humans
 
 *BSON*
 
-- convert JSON strings to binary
+- Convert JSON strings to binary
 
-*Protocol*Buffers,*Thrift*
+*Protocol*Buffers*
 
-- binary, compress integer data, use integer for field names
-- needs generated code do marshall/unmarshall
-
-
-* gRPC
-
-- what is gRPC
+- Binary, compress integer data, use integer for field names
+- Needs generated code for marshall/unmarshall
 
 
-* REST
-
-- what is REST
-
-* GraphQL
-
-- what is GraphQL
-
-* REST vs. GraphQL
-
-.image figures/rest_vs_graphql.png 400 _
-
-* JSON , bJSON, protocol buffers
-
-blabla
 
 * (Web-)Sockets
 
-blavla
+*TCP*Socket*
+
+- Endpoint of a TCP connection (transport layer)
+
+*Websocket*
+
+- High-level (application layer) protocol build on top of TCP
+- Initiate websocket connection through HTTP handshake (overcome firewalls, etc.)
+
+=> You can use both for communication between different programs in your network (TCP Sockets) or over the web (websockets).
+=> Websockets are useful to push from server to client (no need for long polling).
 
 
-* Architectures of Web Systems
+* Main Motivation: Microservices
+
+The main motivation behind RPC are (large-scale) distributed systems where an
+application is composed of several services:
+
+- Allows for loosely coupled (separate concerns) and multilingual development
+- Scale systems across nodes, clusters, data centers
+
+=> Services communicate with each other using RPC
+
+.image figures/microservices.png 300 _
+
+
+
+* Monolithic Architecture
+
+Layered architecture:
+
+- Presentation Layer (i.e., handle HTTP requests and respond with HTML, JSON/XML...)
+- Business Layer (i.e., whatever your application is about)
+- Data Layer (i.e., data model, database access)
+
+=> Integrate with other services using REST, messaging etc...
+=> Scale horizontally by cloning and load balancer
+
+
+* Microservices Architecture
+
+- Application is split into smaller, autonomous services that communicate with each other.
+- Each service: Do one thing well.
+
+
+.image figures/microservices_example.png 300 _
+.caption Figure from microservices.com
+
+* So what's better?
+
+It depends...
+
+No free lunch: Distributed systems complexities:
+
+- CAP theorem
+- Distributed transactions...
+
+General consensus:
+
+=> Start with monolithic until your application becomes too hard to maintain, to adopt new technologies more quickly, aimed performance improvements etc
+
+: scaling is more in the terms of team size, complexity, you can scale monolithic applications similar
+: Good
+: Strong Module Boundaries: Microservices reinforce modular structure, which is particularly important for larger teams.
+: Independent Deployment: Simple services are easier to deploy, and since they are autonomous, are less likely to cause system failures when they go wrong.
+: Technology Diversity: With microservices you can mix multiple languages, development frameworks and data-storage technologies.
+: Bad
+: Distribution: Distributed systems are harder to program, since remote calls are slow and are always at risk of failure.
+: Eventual Consistency: Maintaining strong consistency is extremely difficult for a distributed system, which means everyone has to manage eventual consistency.
+: Operational Complexity: You need a mature operations team to manage lots of services, which are being redeployed regularly.
+
+* Components of Web Systems
 
 * Lets look inside the server
 
-.image figures/request_response.png 250 _
+.image figures/request_response.png 200 _
 .caption Figure from Go Web Programming
 
 * Multiplexer, Handlers & Template Engine
 
+.image figures/web_application_server.png 520 _
+.caption Figure from Go Web Programming
 
-.image figures/web_application_server.png 550 _
 
+* Putting all together
 
+.image figures/web_application_server_database.png 400 _
+.caption Figure from Go Web Programming
 
 * Hello Web!
 

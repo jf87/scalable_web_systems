@@ -1,4 +1,4 @@
-# 4: Deploying to App Engine
+# 5: Deploying to App Engine
 
 In the previous chapter we learned how to write a simple HTTP server in Go as a
 static binary that you can execute easily on any server with the same platform.
@@ -170,10 +170,7 @@ project.
 1. Click on `create a project` and choose a name and project ID
 1. Run `gcloud init` and choose your recently created project. No need to set Compute zones.
 
-That's it! You can now deploy your code to the Google App Engine servers!
-
-Modify the `app.yaml` changing the `application` line to contain the project ID
-of the project you just created and deploy it running:
+That's it! You can now deploy your code to the Google App Engine servers:
 
 ```bash
 $ gcloud app deploy app.yaml
