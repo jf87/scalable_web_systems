@@ -75,7 +75,7 @@ http://jofu.org/
 
 e.g., 
 
-    http://sausheong:password@www.example.com/docs/file?name=sausheong&location=singapore#summary
+    http://www.example.com/docs/file?name=sausheong&location=singapore#summary
 
 
 * Web Basics: HTTP/1.1
@@ -88,7 +88,7 @@ Request-Response protocol:
 
 Content can be compressed, but headers are in text format
 
-Can do single direction streaming, but not bidirectional
+# Can do single direction streaming, but not bidirectional
 
     POST /upload HTTP/1.1
     Host: wwww.example.com
@@ -99,15 +99,23 @@ Can do single direction streaming, but not bidirectional
 
 .caption This slide and some of the following adapted from Vijay Pai's [[platformlab.stanford.edu/Seminar%20Talks/gRPC.pdf][slides]].
 
-* Web Basics: HTTP/2
+: Initially from 1997, last update from 2014
+: HTTP pipelining is a technique in which multiple HTTP requests are sent on a single TCP connection without waiting for the corresponding responses
+: FIFO
+
+* Web Basics: HTTP/2 (2015)
 
 - Binary vs. text based
 - Multiplexed: multiple requests, responses per TCP connection
 - Header compression
 - Server can push to client
 - Out of the box support since Go 1.8
+- Supported by all modern web browsers
+- W3Techs: May 2017, 13.7% of the top 10 million websites supported HTTP/2
 
 .caption More on Go's HTTP/2: [[][https://blog.golang.org/h2push]]
+
+: main goal: reduce latency
 
 * Web Basics: HTTP/2
 
@@ -115,35 +123,33 @@ Can do single direction streaming, but not bidirectional
 
 * HTTP/2 Demo
 
-.iframe http://www.http2demo.io 600 1000
+.iframe http://www.http2demo.io 500 980
+.link http://www.http2demo.io
 
 
 * Web Services Architectural Styles & Formats
 
 
-* Traditional: Monolithic Architecture
+* Traditional: Monolithic/Layered Architecture
 
 .image figures/monolithic.png 500 _
+
+: Presentation Layer (i.e., handle HTTP requests and respond with HTML, JSON/XML...)
+: Business Layer (i.e., whatever your application is about)
+: Data Layer (i.e., data model, database access)
+
+: => Integrate with other services using REST, messaging etc...
 
 * Traditional: Monolithic Architecture
 
 .image figures/monolithic_scaled.png 500 _
 
-* Traditional: Monolithic Architecture
-
-Layered architecture:
-
-- Presentation Layer (i.e., handle HTTP requests and respond with HTML, JSON/XML...)
-- Business Layer (i.e., whatever your application is about)
-- Data Layer (i.e., data model, database access)
-
-=> Integrate with other services using REST, messaging etc...
-=> Scale horizontally by cloning and load balancer
+: => Scale horizontally by cloning and load balancer
 
 
 * Microservices Architecture
 
-.image figures/microservices_example.png 350 _
+.image figures/microservices_example.png 450 _
 .caption Figure from microservices.com
 
 * Microservices Architecture
@@ -154,8 +160,8 @@ Layered architecture:
 - Scale systems across nodes, clusters, data centers.
 
 
-=> Large scale, distribued systems where an application is composed out of
-several microservices are a main motivation behind enhancements in RPC,
+=> Large scale, distributed systems where an application is composed out of
+several services are a main motivation behind enhancements in RPC,
 messaging technologies etc.
 
 
@@ -223,7 +229,7 @@ For more, see Philippe's lecture from 06.09.2017 :-)
 - Binary, compress integer data, use integer for field names
 - Needs generated code for marshall/unmarshall
 
-
+: BSON is used in mongodb
 
 * (Web-)Sockets
 
@@ -254,6 +260,9 @@ General consensus:
 
 => Start with monolithic until your application becomes too hard to maintain, to adopt new technologies more quickly, aimed performance improvements etc
 
+: Consistency	Availability	Partition tolerance
+
+
 : scaling is more in the terms of team size, complexity, you can scale monolithic applications similar
 : Good
 : Strong Module Boundaries: Microservices reinforce modular structure, which is particularly important for larger teams.
@@ -277,10 +286,10 @@ General consensus:
 .caption Figure from Go Web Programming
 
 
-* Putting all together
+# * Putting all together
 
-.image figures/web_application_server_database.png 400 _
-.caption Figure from Go Web Programming
+# .image figures/web_application_server_database.png 400 _
+# .caption Figure from Go Web Programming
 
 * Hello Web!
 
