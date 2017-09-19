@@ -16,7 +16,7 @@ application on Google's cloud platform.
     - Formats
 - Components of Web Systems
 
-## [Slides](http://go-talks.appspot.com/github.com/jf87/scalable_web_systems/sessions/02/slides/session02.slide)
+## [Slides](http://go-talks.appspot.com/github.com/jf87/scalable_web_systems/session-02/slides/session02.slide)
 
 ## Readings
 Go Web Programming chapter 1 and 2.
