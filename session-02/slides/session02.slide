@@ -22,19 +22,6 @@ http://jofu.org/
 
 - Web Programming Hands-On
 
-# Philippe
-
-# 1.
-# 3 tier architecture
-# cloning and partitioning for scaling
-
-# 2.
-# (Remote) Procedure Call
-# REST
-# Message Queues
-# gRPC
-# Protocol Buffers
-
 
 * Web Basics
 
@@ -126,10 +113,51 @@ Can do single direction streaming, but not bidirectional
 
 .image figures/http2.png 400 _
 
-.link http://www.http2demo.io
+* HTTP/2 Demo
+
+.iframe http://www.http2demo.io 600 1000
 
 
 * Web Services Architectural Styles & Formats
+
+
+* Traditional: Monolithic Architecture
+
+.image figures/monolithic.png 500 _
+
+* Traditional: Monolithic Architecture
+
+.image figures/monolithic_scaled.png 500 _
+
+* Traditional: Monolithic Architecture
+
+Layered architecture:
+
+- Presentation Layer (i.e., handle HTTP requests and respond with HTML, JSON/XML...)
+- Business Layer (i.e., whatever your application is about)
+- Data Layer (i.e., data model, database access)
+
+=> Integrate with other services using REST, messaging etc...
+=> Scale horizontally by cloning and load balancer
+
+
+* Microservices Architecture
+
+.image figures/microservices_example.png 350 _
+.caption Figure from microservices.com
+
+* Microservices Architecture
+
+- Application is split into smaller, loosely coupled, autonomous services that communicate with each other.
+- Each service: Do one thing well.
+- Multilingual development.
+- Scale systems across nodes, clusters, data centers.
+
+
+=> Large scale, distribued systems where an application is composed out of
+several microservices are a main motivation behind enhancements in RPC,
+messaging technologies etc.
+
 
 * Architectural Styles
 
@@ -212,42 +240,8 @@ For more, see Philippe's lecture from 06.09.2017 :-)
 => Websockets are useful to push from server to client (no need for long polling).
 
 
-* Main Motivation: Microservices
 
-The main motivation behind RPC are (large-scale) distributed systems where an
-application is composed of several services:
-
-- Allows for loosely coupled (separate concerns) and multilingual development
-- Scale systems across nodes, clusters, data centers
-
-=> Services communicate with each other using RPC
-
-.image figures/microservices.png 300 _
-
-
-
-* Monolithic Architecture
-
-Layered architecture:
-
-- Presentation Layer (i.e., handle HTTP requests and respond with HTML, JSON/XML...)
-- Business Layer (i.e., whatever your application is about)
-- Data Layer (i.e., data model, database access)
-
-=> Integrate with other services using REST, messaging etc...
-=> Scale horizontally by cloning and load balancer
-
-
-* Microservices Architecture
-
-- Application is split into smaller, autonomous services that communicate with each other.
-- Each service: Do one thing well.
-
-
-.image figures/microservices_example.png 300 _
-.caption Figure from microservices.com
-
-* So what's better?
+* Monolithic vs Microservices: So what's better?
 
 It depends...
 
@@ -291,3 +285,17 @@ General consensus:
 * Hello Web!
 
 .play code/hello_web.go
+
+* Hands On
+
+* Hands On
+
+*Note:* All instructions can be found at [[https://github.com/jf87/scalable_web_systems][https://github.com/jf87/scalable_web_systems]]
+
+1. Web Clients
+2. Web Servers
+3. Input validation and status codes
+4. JSON encoding and decoding
+5. Deploying to App Engine
+
+.image figures/gopherswrench.jpg _ 400

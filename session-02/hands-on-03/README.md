@@ -1,4 +1,4 @@
-# 03: Input validation and status codes
+# 03. Input validation and status codes
 
 So far we've just assumed that all the HTTP requests our server receives are
 good. And if there's something that you should never do when writing web
