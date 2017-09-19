@@ -1,15 +1,16 @@
-# 5: Deploying to App Engine
+# 5. Deploying to App Engine
 
-In the previous chapter we learned how to write a simple HTTP server in Go as a
+In the previous sections we learned how to write a simple HTTP server in Go as a
 static binary that you can execute easily on any server with the same platform.
 
 ## Getting ready for success
 
-What would happen if your "Hello, web" went viral? Would your simple binary
-handle the load? You would probably need to add some extra servers, which is
-probably a good idea just to have redundancy.
+What would happen if your "Hello, web" went viral? Would your binary running on
+a single server handle the load? You would probably need to add some extra
+servers, load balancers etc.
 
-How do you that? Many solutions, but the simplest one is Google App Engine.
+
+A simple solution to make your app scalable is Google App Engine.
 
 <div>
 <img src="img/app-engine-logo.png" height=100px></img>
@@ -20,10 +21,10 @@ How do you that? Many solutions, but the simplest one is Google App Engine.
 </div>
 
 With Google App Engine you provide your code and Google is responsible for
-handling any amount of traffic you may get, making sure all servers are up
-so you don't need to worry about them. Check the
-[docs](https://cloud.google.com/appengine/docs) out for more info, this is a
-workshop after all, not a marketing document.
+handling any amount of traffic you may get, making sure all servers are up so
+you don't need to worry about them. Check the
+[docs](https://cloud.google.com/appengine/docs).
+
 
 ## From Hello, web to Hello, App Engine
 
@@ -41,7 +42,6 @@ manage that for you.
 
 This simplifies the code we had before:
 
-[embedmd]:# (examples/hello.go /package hello/ $)
 ```go
 package hello
 
@@ -69,11 +69,13 @@ variable declarations and before the `main` function starts.
 Any operation in App Engine that involves getting out of the machine are controlled by
 a context. This context handles security, quotas, and many other important things.
 
-This means that simply running `http.Get` to fetch some remote page will fail. That's sad.
-How do we fix it? Meet the `urlfetch` package!
+This means that simply running `http.Get` to fetch some remote page will fail.
+That's sad. How do we fix it? Meet the `urlfetch` package!
 
-The `urlfetch` package is defined in [google.golang.org/appengine/urlfetch](https://google.golang.org/appengine/urlfetch),
-and to obtain a new HTTP client we call the `Client` function that requires an `appengine.Context`.
+The `urlfetch` package is defined in
+[google.golang.org/appengine/urlfetch](https://google.golang.org/appengine/urlfetch),
+and to obtain a new HTTP client we call the `Client` function that requires an
+`appengine.Context`.
 
 Before you start using it you need to download it to your machine. Simply run:
 
@@ -81,9 +83,9 @@ Before you start using it you need to download it to your machine. Simply run:
 $ go get -u google.golang.org/appengine/...
 ```
 
-To create a new `appengine.Context` we need to call `appengine.NewContext` and pass an HTTP request.
+To create a new `appengine.Context` we need to call `appengine.NewContext` and
+pass an HTTP request.
 
-[embedmd]:# (app/app.go /package app/ $)
 ```go
 package app
 
@@ -115,7 +117,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-We will see how the `appengine.Context` is used for basically everything on App Engine.
+We will see how the `appengine.Context` is used for basically everything on App
+Engine.
 
 ### Write your app.yaml
 
@@ -139,8 +142,8 @@ handlers:
 ## Run the application locally
 
 Once we have the `main.go` and `app.yaml` files in a directory we can run the
-application locally by going to the directory and executing the `dev_appserver.py` tool
-that comes with the Go SDK for App Engine.
+application locally by going to the directory and executing the
+`dev_appserver.py` tool that comes with the Go SDK for App Engine.
 
 ```bash
 $ dev_appserver.py .
@@ -166,9 +169,13 @@ Once you're happy with how your application looks you might want to share it
 with the world, to do so you will need to create a Google Cloud Platform
 project.
 
-1. Visit https://console.developers.google.com and log in with your credentials.
-1. Click on `create a project` and choose a name and project ID
-1. Run `gcloud init` and choose your recently created project. No need to set Compute zones.
+**If you have not yet a project on Google Cloud Platform, go back to the exercise
+for the first lecture and follow the instructions!**
+
+1. Visit https://console.developers.google.com and log in with your
+   credentials.
+2. In your terminal, go to the folder of your project and run `gcloud init` and
+   choose your Google Cloud project. There is no need to set Compute zones!
 
 That's it! You can now deploy your code to the Google App Engine servers:
 
@@ -176,24 +183,19 @@ That's it! You can now deploy your code to the Google App Engine servers:
 $ gcloud app deploy app.yaml
 ```
 
-Once this succeeds your app is available on https://your-project-id.appspot.com,
-or running:
+Once this succeeds your app is available on
+https://your-project-id.appspot.com, or running:
 
 ```bash
 $ gcloud app browse
 ```
 
-### Exercise Deploy to App Engine
+### Exercises
 
-Follow the instructions above and deploy the code you've been working on so far
-to App Engine.
+1. Follow the instructions above and deploy the code you've been working on so
+   far to App Engine. Verify that it works.
 
 # Congratulations!
 
 You just deployed your first web app to Google App Engine! Maybe it's time to
 tell the world about it? No more localhost on your URLs!
-
-Or maybe it's a bit too early ... let's see if we can make the application look
-a bit better using HTML in addition to our Go code.
-
-Continue to [the next section](../section05/README.md).

@@ -1,13 +1,16 @@
 # 02. Web Programming in Go
 
-This session gives a re-cap on web foundations and architectures of web systems
-and web services. In the hands-on part, you will develop go web clients and
-servers and work with JSON for encoding.
-Then you will see how you can deploy your application on Google's cloud platform.
+The lecture gives quick a re-cap on web foundations and components of web
+systems and web services. We discuss the trade-offs between a monolithic and a
+microservices architecture for scalability.
+In the hands-on part, you will learn how to develop web clients and servers and
+how to work with JSON in Go. Finally, you will see how you can deploy your
+application on Google's cloud platform.
 
 ## Outline
 
 - Web foundations (Client-Server, HTTP)
+- Monolithic vs. Microservice 
 - Web Services
     - Architectural Styles
     - Formats
@@ -16,7 +19,7 @@ Then you will see how you can deploy your application on Google's cloud platform
 ## [Slides](http://go-talks.appspot.com/github.com/jf87/scalable_web_systems/sessions/02/slides/session02.slide)
 
 ## Readings
-Go Web Programming chapter 1 and 2
+Go Web Programming chapter 1 and 2.
 
 
 ### Questions
@@ -33,8 +36,7 @@ Go Web Programming chapter 1 and 2
 5. [Deploying to App Engine*](hands-on-05)
 
 
-*Based on Francesc's great [go-web-workshop](https://github.com/campoy/go-web-workshop).
-
-
 ## Further Reads
-- https://golang.org/doc/articles/wiki/
+- [Golang.org - Writing Web Applications](https://golang.org/doc/articles/wiki/)
+
+*Based on Francesc's [go-web-workshop](https://github.com/campoy/go-web-workshop).

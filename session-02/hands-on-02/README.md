@@ -1,13 +1,14 @@
-# 02: Web servers
+# 02. Web servers
 
 In this section you'll learn how to write a simple HTTP server in Go.
 
-We will use the [`net/http`](https://golang.org/pkg/net/http) package to do so, click
-on that link to browse its documentation.
+We will use the [`net/http`](https://golang.org/pkg/net/http) package to do so,
+click on that link to browse its documentation.
 
 ### Defining HTTP handlers
 
-The `net/http` package defines the [`HandlerFunc`](https://golang.org/pkg/net/http#HandlerFunc) type:
+The `net/http` package defines the
+[`HandlerFunc`](https://golang.org/pkg/net/http#HandlerFunc) type:
 
 ```go
 type HandlerFunc func(ResponseWriter, *Request)
@@ -18,7 +19,8 @@ The first parameter of this function type is a
 provides a way to set headers on the HTTP response. It also provides a `Write`
 method which makes it satisfy the `io.Writer` interface.
 
-Let's see a very simple HTTP handler that simply writes `"Hello, web"` to the output:
+Let's see a very simple HTTP handler that simply writes `"Hello, web"` to the
+output:
 
 [embedmd]:# (examples/step1/main.go /package main/ /^}/)
 ```go
@@ -89,10 +91,12 @@ web server!
 
 #### The Handler interface
 
-Using `http.HandleFunc` and passing a value of type `http.HandlerFunc` can be pretty constraining.
-There's also another function `http.Handle` that will accept any value satisfying the `http.Handler` interface.
+Using `http.HandleFunc` and passing a value of type `http.HandlerFunc` can be
+pretty constraining. There's also another function `http.Handle` that will
+accept any value satisfying the `http.Handler` interface.
 
-The [`http.Handler`](https://golang.org/pkg/net/http/#Handler) interface is defined in the `http` package as:
+The [`http.Handler`](https://golang.org/pkg/net/http/#Handler) interface is
+defined in the `http` package as:
 
 ```go
 type Handler interface {
@@ -111,7 +115,8 @@ func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request) {
 }
 ```
 
-We will see how this interface is the extension points where web frameworks and toolkits add functionality.
+We will see how this interface is the extension points where web frameworks and
+toolkits add functionality.
 
 ### Listening and serving
 
@@ -135,8 +140,8 @@ with `HandleFunc` we don't need to provide any value here: `nil` will do.
 And last but definitely not least the function returns an `error`. In Go,
 errors are handled by returning values rather than throwing exceptions.
 
-The type `error` is a predefined type (just like `int` or `bool`) and is an interface
-with only one method:
+The type `error` is a predefined type (just like `int` or `bool`) and is an
+interface with only one method:
 
 ```go
 type error interface {
@@ -150,7 +155,6 @@ when no error has occurred the returned value equals to `nil`.
 So if we want to check that our server started successfully and log an error
 otherwise we would modify our code to add a call to `ListenAndServe`.
 
-[embedmd]:# (examples/step3/main.go /package main/ $)
 ```go
 package main
 
@@ -181,16 +185,14 @@ Try it:
 
 And then visit http://127.0.0.1:8080/hello.
 
-### Exercise Bye, web
+### Exercises
 
-Modify the program above by adding a second handler named `byeHandler` that prints `"Bye, web"`
-to the http response.
+1. Modify the program above by adding a second handler named `byeHandler` that
+   prints `"Bye, web"` to the http response.
 
-### Exercise Hello, Handler
-
-Modify the program from the previous example so you can replace the call to `http.HandleFunc`
-by a call to `http.Handle`. You will need to define a new type `helloHandler` and make that type
-satisfy the `http.Handler` interface.
+2. Modify the program from the previous example so you can replace the call to
+   `http.HandleFunc` by a call to `http.Handle`. You will need to define a new
+   type `helloHandler` and make that type satisfy the `http.Handler` interface.
 
 ### A better multiplexor
 
@@ -202,9 +204,9 @@ to your handlers such as:
 
 These cases can be handled either by hand or using a toolkit that will plug
 correctly into the existing `net/http` package, such as the
-[Gorilla toolkit](http://www.gorillatoolkit.org/) and its `mux` package.
+[Gorilla toolkit](http://www.gorillatoolkit.org/) and its `mux` package
+([httprouter](https://github.com/julienschmidt/httprouter) is another option).
 
-[embedmd]:# (examples/gorilla.go /package main/ $)
 ```go
 package main
 
@@ -251,25 +253,26 @@ func main() {
 Gorilla also provides packages for session management, cookies, etc.
 Have a look at the [documentation](www.gorillatoolkit.org/).
 
-#### Exercise Hello, {you}
+### Exercises
 
-Using the `mux` package from the previous example write a new web server.
-This server will handle all HTTP requests sent to `/hello/name` with an HTTP page
-containing the text `"Hello, name"`. The `name` in this example can of course change,
-so if the request was `/hello/Francesc` the response should say `"Hello, Francesc"`.
+1. Using the `mux` package from the previous example write a new web server.
+   This server will handle all HTTP requests sent to `/hello/name` with an HTTP
+   page containing the text `"Hello, name"`. The `name` in this example can of
+   course change, so if the request was `/hello/Francesc` the response should
+   say `"Hello, Francesc"`.
 
-_Note_: to install the `mux` package in your machine you can use `go get`:
+    _Note_: to install the `mux` package in your machine you can use `go get`:
 
-```bash
-$ go get github.com/gorilla/mux
-```
+    ```bash
+    $ go get github.com/gorilla/mux
+    ```
 
 # Congratulations!
 
 You just wrote your first HTTP server in Go! Isn't it awesome? Well, it doesn't
 do much yet but the best is to come.
 
-On the next chapter we'll learn how to validate whatever the input of your HTTP endpoints and
-how to signal different problems in the HTTP responses.
+On the next part we'll learn how to validate whatever the input of your HTTP
+endpoints and how to signal different problems in the HTTP responses.
 
 Continue to [the next section](../03/README.md).

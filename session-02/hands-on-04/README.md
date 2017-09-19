@@ -1,4 +1,4 @@
-# 04: JSON encoding and decoding
+# 04. JSON encoding and decoding
 
 Go's standard library provides JSON encoding and decoding with the package
 [`encoding/json`](https://golang.org/pkg/encoding/json).
@@ -10,8 +10,8 @@ see afterwards how to do it inside of an HTTP server.
 
 ### JSON and Go structs
 
-The easiest way to encode and decode JSON objects with Go is to create a Go type
-which matches the structure of the JSON object we want to decode.
+The easiest way to encode and decode JSON objects with Go is to create a Go
+type which matches the structure of the JSON object we want to decode.
 
 So given a JSON object like this:
 
@@ -41,7 +41,6 @@ for each Go field.
 
 For instance we would add the following field tags to the previous example:
 
-[embedmd]:# (examples/app.go /type Person/ /^}/)
 ```go
 type Person struct {
 	Name     string `json:"name"`
@@ -61,7 +60,6 @@ To encode a Go struct we use a
 [`json.Encoder`](https://golang.org/pkg/encoding/json#Encoder), which provides
 a handy `Encode` method.
 
-[embedmd]:# (examples/app.go /func encode/ /^}/)
 ```go
 func encode() {
 	p := Person{"gopher", 5}
@@ -78,7 +76,7 @@ func encode() {
 ```
 
 This code snippet shows how to handle errors every time we encode a value,
-and while in the example it seems impossible to have an error consider that
+and while in the example it seems impossible to have an error, consider that
 the encoder output could be sent through a network connection.
 
 You can try the code with the `go run` tool, or using the Go playground
@@ -89,7 +87,6 @@ You can try the code with the `go run` tool, or using the Go playground
 The same way we have a `json.Encoder` we have a `json.Decoder` and its usage
 is very similar.
 
-[embedmd]:# (examples/app.go /func decode/ /^}/)
 ```go
 func decode() {
 	// create an empty Person value.
@@ -113,7 +110,49 @@ pointer to the variable `p` so the `encoding/json` package can modify the
 value of `p`. Otherwise we would pass a copy of `p` and any modifications
 would be without side effects.
 
-Read more about pointers in the [Go tour](https://tour.golang.org/moretypes/1).
+You can read more about pointers in the [Go
+tour](https://tour.golang.org/moretypes/1).
+
+
+### Parsing JSON without knowing the schema
+
+In above example, we know the structure of the JSON object beforehand. If this
+is the case, you should always create a matching Go type. However, there are
+cases where the JSON structure is not known before. So how can you decode such data?
+
+In Go, you do that by parsing the JSON into `interface{}` instead of a struct
+and then inspecting the data.
+`interface{}` is known as the empty interface. It specifies zero methods and
+thus all types implement the empty interface (every type implements at least
+zero methods).
+This means that it can hold any types.
+So, to decode it, you need to walk the datastructure using Go's [type
+assertions](https://tour.golang.org/methods/15), for example:
+
+``` go
+func printJSON(v interface{}) {
+	switch vv := v.(type) {
+	case string:
+		fmt.Println("is string", vv)
+	case float64:
+		fmt.Println("is float64", vv)
+	case []interface{}:
+		fmt.Println("is an array:")
+		for i, u := range vv {
+			fmt.Print(i, " ")
+			printJSON(u)
+		}
+	case map[string]interface{}:
+		fmt.Println("is an object:")
+		for i, u := range vv {
+			fmt.Print(i, " ")
+			printJSON(u)
+		}
+	default:
+		fmt.Println("Unknown type")
+	}
+}
+```
 
 ## encoding/json + net/http = web services!
 
@@ -130,7 +169,6 @@ therefore satisfies the `io.Writer` interface required by `json.NewEncoder`.
 
 So we can easily JSON encode a `Person` on an HTTP response:
 
-[embedmd]:# (examples/app.go /func encodeHandler/ /^}/)
 ```go
 func encodeHandler(w http.ResponseWriter, r *http.Request) {
 	p := Person{"gopher", 5}
@@ -179,10 +217,9 @@ $ curl -d '{"name": "gopher", "age_years": 5}' http://localhost:8080/
 Name is gopher and age is 5
 ```
 
-## Exercise
+## Exercises
 
-Add JSON encoding and decoding to the events application with [step 1](../events/step1/README.md).
-Then come back here for more!
+TODO
 
 # Congratulations!
 
@@ -190,7 +227,6 @@ You've successfully built a web application where the backend and the frontend
 interact via JSON messages over HTTP requests: that's pretty much as RESTful as
 it gets!
 
-But what if we want to store some of that information we're decoding?
+Continue to the [next section](../05/README.md) to learn how to deploy your
+application on Google's cloud platform.
 
-Continue to the [next section](../05/README.md) to learn about
-using PostgreSQL and MongoDB to store data.
