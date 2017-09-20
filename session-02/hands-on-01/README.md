@@ -181,4 +181,4 @@ random:yolo
 
 Good job! You now know pretty much everything there is to know (today) for HTTP
 clients, requests, and responses. Now, to understand how all of this is handled
-on the server side, let's go the [next section](../02/README.md).
+on the server side, let's go the [next section](../hands-on-02/README.md).

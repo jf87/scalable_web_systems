@@ -249,4 +249,4 @@ func main() {
 You're now able to validate the input to your http handlers and set the status
 code and content type accordingly.
 
-Go to [section 4](../04/README.md) to continue.
+Go to [section 4](../hands-on-04/README.md) to continue.
