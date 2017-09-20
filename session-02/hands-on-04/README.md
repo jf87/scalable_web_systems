@@ -260,6 +260,6 @@ You've successfully built a web application where the backend and the frontend
 interact via JSON messages over HTTP requests: that's pretty much as RESTful as
 it gets!
 
-Continue to the [next section](../05/README.md) to learn how to deploy your
+Continue to the [next section](../hands-on-05/README.md) to learn how to deploy your
 application on Google's cloud platform.
 

@@ -275,4 +275,4 @@ do much yet but the best is to come.
 On the next part we'll learn how to validate whatever the input of your HTTP
 endpoints and how to signal different problems in the HTTP responses.
 
-Continue to [the next section](../03/README.md).
+Continue to [the next section](../hands-on-03/README.md).
