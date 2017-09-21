@@ -140,7 +140,7 @@ Content can be compressed, but headers are in text format
 
 : => Integrate with other services using REST, messaging etc...
 
-* Traditional: Monolithic Architecture
+* Traditional: Monolithic/Layered Architecture
 
 .image figures/monolithic_scaled.png 500 _
 
