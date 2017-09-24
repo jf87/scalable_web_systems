@@ -194,6 +194,8 @@ $ gcloud app browse
 
 1. Follow the instructions above and deploy the code you've been working on so
    far to App Engine. Verify that it works.
+   
+Note: Don't forget to stop the App Engine when you're done. This can be done in the [App Engine settings](https://console.cloud.google.com/appengine/settings).
 
 # Congratulations!
 
