@@ -1,5 +1,7 @@
 # 5. Deploying to App Engine
 
+**Note: You need to install the [Google Cloud SDK](https://cloud.google.com/sdk/) for this exercise!**
+
 In the previous sections we learned how to write a simple HTTP server in Go as a
 static binary that you can execute easily on any server with the same platform.
 
