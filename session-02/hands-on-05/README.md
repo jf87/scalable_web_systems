@@ -1,6 +1,7 @@
 # 5. Deploying to App Engine
 
 **Note: You need to install the [Google Cloud SDK](https://cloud.google.com/sdk/) for this exercise!**
+**Note: You need to use Python 2.x and not 3.x**
 
 In the previous sections we learned how to write a simple HTTP server in Go as a
 static binary that you can execute easily on any server with the same platform.
@@ -146,6 +147,8 @@ handlers:
 Once we have the `main.go` and `app.yaml` files in a directory we can run the
 application locally by going to the directory and executing the
 `dev_appserver.py` tool that comes with the Go SDK for App Engine.
+
+**Note: Either you need to add the `bin` folder in the Google Cloud SDK folder to your `PATH` variable, or specify the absolute path to `dev_appserver.py`**
 
 ```bash
 $ dev_appserver.py .
