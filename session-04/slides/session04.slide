@@ -1,0 +1,985 @@
+Scalability of Web Systems
+Concurrency
+11 Oct 2017
+Tags: Go, Programming, Web
+
+Jonathan Fürst
+IT University of Copenhagen
+jonf@itu.dk
+http://jofu.org/
+@jf87
+
+
+* Doing well until 2005
+
+.image figures/40-years-processor-trend-2005.png 550 _
+
+: Moore’s law still holds (number of transistors)
+: Chip performance doubles every 18 months
+: (being a combination of the effect of more transistors and the transistors being faster)
+
+: Physical limits
+: Slow down in processor clock speed
+
+
+* Bottleneck in Clock Speeds
+
+
+.image figures/40-years-processor-trend-2015.png 550 _
+
+* Consequences
+
+- Sequential programs don't scale anymore.
+- The scope of problems we can solve sequentially is not going to become larger the next foreseeable future.
+- Real world is concurrent and not sequential => should model program structure accordingly.
+- Need for multiple cores and distributed computing.
+
+
+=> Today we talk about how to deal with these changed conditions.
+
+* Outline
+
+
+1. Processes and Threads
+
+- OS Basics
+- Synchronization Mechanisms
+
+2. Concurrency
+
+3. Concurrent Design in Go
+
+4. goroutines and channels
+
+5. Examples
+
+- Load Balancer
+- Query a Replicated Database
+
+6. Beyond Single Nodes
+
+
+
+# 1. Concurrency Concepts
+
+# - Concurrency Basics
+# - Mutex
+# - Semaphores
+
+# 2. Concurrency Patterns
+# - Barrier
+# - Monitors
+# - Message Parsing
+# - Thread Pool
+# - Producer-Consumer
+
+# 2. Web and Concurrency
+
+# 3. Go Concurrency Concepts
+
+# - Goroutines and channels
+# - 'sync' package
+
+
+
+* Processes and Threads
+
+* A Process in Memory
+
+.image figures/process-in-memory.png 450 _
+
+.caption This and following figures from Abraham Silberschatz's Operating System Concepts.
+
+: text section : program code
+: data section: global variables
+: stack : temporary data (function, return addresses, local variables)
+: heap : dynamically located memory during process run time (dynamically sized array)
+
+* Process Control Block
+
+.image figures/process-control-block.png 450 _
+
+- Program counter and CPU registers define current activity of the process.
+
+* Process States
+
+.image figures/process-states.png 400 _
+
+
+* Process Switching
+
+.image figures/process-switching.png 600 _
+
+
+* Problems with Structuring Application in Multiple Processes
+
+# - Context switch between processes is expensive.
+- If processes are not independent, we need some form of *interprocess*communication*(IPC)*:
+
+(a) Message parsing 
+
+or
+
+(b) Shared memory
+
+
+* Interprocess Communication
+
+(a) Message Parsing (e.g., sockets, RPCs, pipes)
+(b) Shared Memory (e.g., POSIX shared memory)
+
+.image figures/ipc.png 500 _
+
+* So why do we need Threads?
+
+Process creation is time consuming, resource intensive and communication is harder.
+
+- Because threads share their parent process' resources, creation and context switching is much faster.
+- Processes need to share resources explicitly through shared memory or message parsing, but threads share memory and resources of the parent process within the same address space.
+
+.image figures/thread-vs-process.png 300 _
+
+
+* Popular Thread Libraries
+
+- Pthreads
+- Windows threads
+- JVM threads
+
+Java example:
+
+Define a class that implements Runnable interface and call start() method.
+
+    public interface Runnable {
+        public abstract void run();
+    }
+
+- See [[https://docs.oracle.com/javase/tutorial/essential/concurrency/runthread.html][Java Tutorial]] on threads.
+- [[https://docs.oracle.com/javase/8/docs/api/index.html?java/util/concurrent/package-summary.html][java.util.concurrent]] supports implicit thread creation and management.
+
+* Lesson
+
+- Processes and threads are fundamental OS abstraction.
+- We can use higher level APIs that support implicit thread creation and management.
+- But: Even if we use higher level abstractions, we need to understand these building blocks and their impact on performance.
+
+* Concurrency
+
+* Concurrency ≠ Parallelism
+
+*Concurrent*programming:*
+
+The expression of a program as a composition of several autonomous activities.
+
+=> Concurrency is about dealing with lots of things at once (more design, structure orientated).
+
+*Parallelism:*
+
+The simultaneous execution of (possibly related) computations.
+
+=> Parallelism is about doing lots of things at once (execution).
+
+
+*Concurrency*provides*a*way*to*structure*a*solution*to*solve*a*problem*that*may*(but*not*necessarily)*be*parallelizable.*
+
+
+* Concurrency Challenges
+
+1. Identify Tasks:
+
+- Identify areas that can be divided into concurrent tasks (ideally independent).
+
+2. Balance:
+
+- Tasks should perform equal work of equal value.
+
+3. Data Splitting:
+
+- How to split data that is accessed by separate tasks?
+
+4. Data Dependency:
+
+- If data dependencies between different tasks => *Synchronization*needed*.
+
+5. Testing and Debugging:
+
+- Many different execution paths possible, testing & debugging become more difficult.
+
+
+* Synchronization : Problem
+
+Thread 1:
+
+    func foo() {
+        x++;
+        y = x;
+    }
+
+Thread 2:
+
+    func bar() {
+        y++;
+        x+=3;
+    }
+
+If the initial state is y = 0, x = 6, what happens after these threads finish running?
+
+: Program with two threads that are in functions foo and bar
+: There are multiple possible final states. Y is definitely a problem, because we don’t know if it will be “1” or “6”… but X can also be 7 or 8!
+
+* Multithreaded = Unpredictability
+
+Many things that look like “one step” operations take several steps under the hood:
+
+    func foo() {
+        eax = mem[x];
+        inc eax;
+        mem[x] = eax;
+        ebx = mem[x];
+        mem[y] = ebx;
+    }
+
+
+    func bar() {
+        eax = mem[y];
+        inc eax;
+        mem[y] = eax;
+        eax = mem[x];
+        add eax, 3;
+        mem[x] = eax;
+    }
+
+When we run a multithreaded program, we don’t know what order threads run in, nor do we know when they will be interrupted.
+
+: One of the reasons is that the operations in which you program are actually composed of several steps when they are compiled.
+: Example increment x.
+: Threads may be interleaved in various ways.
+
+: What is the name for this issue?
+
+
+
+* Multithreaded = Unpredictability
+
+This applies to more than just integers:
+
+- Pulling work units from a queue
+- Reporting work back to master unit
+- Telling another thread that it can begin the “next phase” of processing
+
+=> All require synchronization!
+
+
+: Applies to higher level data structures as well
+: Example linked  list that implements counter.
+
+: Class List {
+: Item head;
+: Int count;	→ items in list
+: }
+
+: If we add a new element to this list we need to update the head element and increase the count.
+: So other thread might come in and read the wrong count.
+: → crash
+
+: Always when we do an operation that requires more then one step, we need synchronization.
+
+* Synchronization Primitives
+
+- A synchronization primitive is a special shared variable that guarantees that it can only be accessed atomically. 
+- Hardware support guarantees that operations on synchronization primitives only ever take one step (test and modify the content of a word or swap the contents of two words atomically).
+
+: So how do we deal with this in multithreaded programming?
+: Synchronization primitive, atomic operations (ensured by hardware)
+
+: (processor logs down memory bus so that other threads cannot continue with their reads and writes)
+
+
+* Synchronization Primitives : Mutex Lock
+
+=> Simplest synchronization tool.
+
+In Go:
+
+    import "sync"
+
+Lock locks m. If the lock is already in use, the caller blocks until the mutex is available.
+
+    func (m *Mutex) Lock()
+
+Unlock unlocks m. It is a run-time error if m is not locked on entry to Unlock.
+
+    func (m *Mutex) Unlock()
+
+: naming might be different in other languages (e..g., release, acquire)
+
+* Synchronization Primitives : Semaphore
+
+- A semaphore is a flag that can be raised or lowered in one step.
+- Semaphores were flags that railroad engineers would use when entering a shared track.
+
+.image figures/semaphore.png 350 _
+
+.caption For more see [[http://dl.acm.org/citation.cfm?id=762974][Edsger W. Dijkstra: Cooperating sequential processes]].
+
+: There is a real world example for this synchronization primitives.
+: Train track, with shared resource (e.g., single bridge, tunnel)
+: The train engineers solved this with a set of red and green flags that are called semaphores.
+: Initially both flags on each side of the bridge are green.
+: When train approaches, opposite side flag turns red.
+: 
+: How does this relate to computer science?
+: 
+: Only one side of the semaphore can ever be red! (Can both be green?)
+
+
+* Synchronization Primitives : Semaphore
+
+- Semaphore restricts the number of simultaneous threads accessing a shared resource.
+
+For a binary semaphore:
+
+- wait() and signal() can be thought of as lock() and unlock()
+- Calls to lock() when the semaphore is already locked cause the thread to block.
+
+Pitfalls:
+
+- Must “bind” semaphores to particular objects; must remember to unlock correctly
+- Mutex can only be unlocked by thread that locked it, semaphore can be signaled from any thread.
+
+: wait/signal can be though as lock and unlock.
+: 
+: So when we want to access a shared resource we call lock, modify it and call unlock.
+: Keypoint: only one thread can have lock.
+: Lock ensures that can only be accessed by one thread → other thread sleeps
+: 
+: Problem:
+: Programmer responsibility to lock all affected variables!
+: 
+: Board:
+: int x
+: lx, ly
+: 
+: Compiler does not prevent us to use wrong lock!
+: 
+: Going back to example...
+
+* The “corrected” example
+
+Thread 1:
+
+    void foo() {
+        sem.lock();
+        x++;
+        y = x;
+        sem.unlock();
+    }
+
+Thread 2:
+
+    void bar() {
+        sem.lock();
+        y++;
+        x+=3;
+        sem.unlock();
+    }
+
+Global var “Semaphore sem = new Semaphore();” guards access to x & y
+
+: Applying this to our example:
+: Ask: are there still any problems? (Yes – we still have two possible outcomes. We want some other system that allows us to serialize access on an event.
+: Don’t ensure flow.
+: 
+: Locks only provide mutual exclusion, but we want to place an ordering.
+
+
+* Condition Variables
+
+- A condition variable notifies threads that a particular condition has been met. 
+- Inform another thread that a queue now contains elements to pull from (or that it’s empty – request more elements!)
+- Pitfall: What if nobody’s listening?
+
+: So how do we ensure the right program flow? Condition variables
+: 
+: For example, one thread fills queue oder takes elements from queue → should fall asleep when no elements and wake up on the condition that there are elements.
+: In our example, notify when foo has finished so that bar can continue.
+: 
+: Semaphore: lock and unlock
+: Condition variable: wait and notify
+: 
+: signal/notify
+
+
+* The final example
+
+    func foo() {
+        sem.lock();
+        x++;
+        y = x;
+        fooDone = true;
+        sem.unlock();
+        fooFinishedCV.notify();
+    }
+
+
+    func bar() {
+        sem.lock();
+        if(!fooDone)
+            fooFinishedCV.wait(sem);
+        y++;
+        x+=3;
+        sem.unlock();
+    }
+
+Global vars: Semaphore sem = new Semaphore();
+ConditionVar fooFinishedCV = new ConditionVar();
+boolean fooDone = false;
+
+: In our example, notify when foo has finished so that bar can continue.
+: 
+: Introduce a boolean fooDone
+: And condition variable fooFinishedCV
+: 
+: The reason is that if nobody is waiting, notification goes to nowhere, notify is one shot thing.
+: 
+: If bar starts before, it aquires the lock, sees that foo has not been finished, then passes the wait function the lock in form of the semaphore (which releases the lock)
+: Then when foo notifies bar, it wakes up the wait and bar reacquires the lock and provides with its logic.
+
+
+* Lesson
+
+Synchronization is really hard
+ 
+- Need to consider all possible shared state
+- Must keep locks organized and use them consistently and correctly
+ 
+Knowing there are bugs may be tricky; fixing them can be even worse!
+
+
+=> Keeping shared state to a minimum reduces total system complexity
+
+: Cheat: Single lock for all shared state → reduces performance
+
+: Good solution: keep shared state to a minimum
+
+* Concurrent Design in Go
+
+* The Go Way: Provide a Model for Concurrent Software Construction
+
+Easy to understand.
+
+Easy to use.
+
+Easy to reason about.
+
+You don't need to be an expert!
+
+=> Much nicer than dealing with the minutiae of parallelism (threads, semaphores, locks, barriers, etc.).
+
+
+Origins:
+
+- [[https://dl.acm.org/citation.cfm?id=359585][Hoare, C. A. R. (1978). "Communicating sequential processes". Communications of the ACM.]]
+
+* Communicating Sequential Processes (CSP)
+
+- TODO: main points and insight of Hoare's paper.
+
+- Don't communicate by sharing memory, share memory by communicating.
+
+- Erlang is more pure CSP
+
+* Gophers
+
+This is too abstract. Let's get concrete.
+
+.image figures/gophers.jpg 400 _
+
+.caption The following slides are courtesy of Rob Pike's [[https://talks.golang.org/2012][great presentations on concurrency]]. 
+
+* Our problem
+
+Move a pile of obsolete language manuals to the incinerator.
+
+.image waza/gophersimple1.jpg
+
+With only one gopher this will take too long.
+
+* More gophers!
+
+.image waza/gophersimple3.jpg
+
+More gophers are not enough; they need more carts.
+
+* More gophers and more carts
+
+.image waza/gophersimple2.jpg
+
+This will go faster, but there will be bottlenecks at the pile and incinerator.
+Also need to synchronize the gophers.
+A message (that is, a communication between the gophers) will do.
+
+* Double everything
+
+Remove the bottleneck; make them really independent.
+
+.image waza/gophersimple4.jpg
+
+This will consume input twice as fast.
+
+* Concurrent composition
+
+.image waza/gophersimple4.jpg
+The concurrent composition of two gopher procedures.
+
+* Concurrent composition
+
+This design is not automatically parallel!
+
+What if only one gopher is moving at a time?
+Then it's still concurrent (that's in the design), just not parallel.
+
+However, it's automatically parallelizable!
+
+Moreover the concurrent composition suggests other models.
+
+* Another design
+
+.image waza/gophercomplex0.jpg
+
+Three gophers in action, but with likely delays.
+Each gopher is an independently executing procedure,
+plus coordination (communication).
+
+* Finer-grained concurrency
+
+Add another gopher procedure to return the empty carts.
+
+.image waza/gophercomplex1.jpg
+
+Four gophers in action for better flow, each doing one simple task.
+
+If we arrange everything right (implausible but not impossible), that's four times faster than our original one-gopher design.
+
+* Observation
+
+We improved performance by adding a concurrent procedure to the existing design.
+
+More gophers doing more work; it runs better.
+
+This is a deeper insight than mere parallelism.
+
+* Concurrent procedures
+
+Four distinct gopher procedures:
+
+- load books onto cart
+- move cart to incinerator
+- unload cart into incinerator
+- return empty cart
+
+Different concurrent designs enable different ways to parallelize.
+
+* More parallelization!
+
+We can now parallelize on the other axis; the concurrent design makes it easy. Eight gophers, all busy.
+
+.image waza/gophercomplex2.jpg
+
+* Or maybe no parallelization at all
+
+Keep in mind, even if only one gopher is active at a time (zero parallelism), it's still a correct and concurrent solution.
+
+.image waza/gophercomplex2.jpg
+
+* Another design
+
+Here's another way to structure the problem as the concurrent composition of gopher procedures.
+
+Two gopher procedures, plus a staging pile.
+
+.image waza/gophercomplex3.jpg
+
+* Parallelize the usual way
+
+Run more concurrent procedures to get more throughput.
+
+.image waza/gophercomplex4.jpg
+
+* Or a different way
+
+Bring the staging pile to the multi-gopher concurrent model:
+
+.image waza/gophercomplex5.jpg
+
+* Full on optimization
+
+Use all our techniques. Sixteen gophers hard at work!
+
+.image waza/gophercomplex6.jpg
+
+* Lesson
+
+There are many ways to break the processing down.
+
+That's concurrent design.
+
+Once we have the breakdown, parallelization can fall out and correctness is easy.
+
+
+* Back to Computing
+
+In our book transport problem, substitute:
+
+- book pile => web content
+- gopher => CPU
+- cart => marshaling, rendering, or networking
+- incinerator => proxy, browser, or other consumer
+
+It becomes a concurrent design for a scalable web service.
+Gophers serving web content.
+
+
+
+* Concurrency in Go: Goroutines and Channels
+
+* A boring function
+
+We need an example to show the interesting properties of the concurrency primitives.
+
+To avoid distraction, we make it a boring example.
+
+.play concurrency/support/boring.go /START/,/STOP.*/
+
+* Slightly less boring
+
+Make the intervals between messages unpredictable (still under a second).
+
+.play concurrency/support/lessboring.go /START/,/STOP/
+
+* Running it
+
+The boring function runs on forever, like a boring party guest.
+
+.play concurrency/support/lessboring.go /^func.main/,$
+
+* Ignoring it
+
+The go statement runs the function as usual, but doesn't make the caller wait.
+
+It launches a goroutine.
+
+The functionality is analogous to the & on the end of a shell command.
+
+.play concurrency/support/goboring.go 1,/^}/
+
+* Ignoring it a little less
+
+When main returns, the program exits and takes the boring function down with it.
+
+We can hang around a little, and on the way show that both main and the launched goroutine are running.
+
+.play concurrency/support/waitgoboring.go /func.main/,/^}/
+
+
+* Goroutines
+
+What is a goroutine? It's an independently executing function, launched by a go statement.
+
+It has its own call stack, which grows and shrinks as required.
+
+It's very cheap. It's practical to have thousands, even hundreds of thousands of goroutines.
+
+It's not a thread.
+
+There might be only one thread in a program with thousands of goroutines.
+
+Instead, goroutines are multiplexed dynamically onto threads as needed to keep all the goroutines running.
+
+But if you think of it as a very cheap thread, you won't be far off.
+
+: Go really supports concurrency
+: 
+: Really.
+: 
+: It's routine to create thousands of goroutines in one program.
+: (Once debugged a program after it had created 1.3 million.)
+: 
+: Stacks start small, but grow and shrink as required.
+: 
+: Goroutines aren't free, but they're very cheap.
+
+
+* Communication
+
+Our boring examples cheated: the main function couldn't see the output from the other goroutine.
+
+It was just printed to the screen, where we pretended we saw a conversation.
+
+Real conversations require communication.
+
+
+* Channels for communication
+
+Channels are typed values that allow goroutines to synchronize and exchange information.
+
+
+.code concurrency/support/helpers.go /START1/,/STOP1/
+.code concurrency/support/helpers.go /START2/,/STOP2/
+.code concurrency/support/helpers.go /START3/,/STOP3/
+
+
+* Using channels
+
+A channel connects the main and boring goroutines so they can communicate.
+
+.play concurrency/support/changoboring.go /START1/,/STOP1/
+.code concurrency/support/changoboring.go /START2/,/STOP2/
+
+* Synchronization
+
+When the main function executes <–c, it will wait for a value to be sent.
+
+Similarly, when the boring function executes c <– value, it waits for a receiver to be ready.
+
+A sender and receiver must both be ready to play their part in the communication. Otherwise we wait until they are.
+
+Thus channels both communicate and synchronize.
+
+* An aside about buffered channels
+
+Note for experts: Go channels can also be created with a buffer.
+
+Buffering removes synchronization.
+
+Buffering makes them more like Erlang's mailboxes.
+
+Buffered channels can be important for some problems but they are more subtle to reason about.
+
+We won't need them today.
+
+
+* Closures are also part of the story
+
+Make some concurrent calculations easier to express.
+
+They are just local functions.
+Here's a non-concurrent example:
+
+.code waza/snippets /Compose/,/sin,/
+
+
+# Learn concurrent Go by osmosis.
+
+* Example: Launching daemons
+
+Use a closure to wrap a background operation.
+
+This copies items from the input channel to the output channel:
+
+.code waza/snippets /copy.input/,/^}/
+
+The `for` `range` operation runs until channel is drained.
+
+* Example 1: Load Balancer
+
+* A simple load balancer (1)
+
+A unit of work:
+
+.code waza/load1 /type/,/^}/
+
+* A simple load balancer (2)
+
+A worker task
+
+.code waza/load1 /worker/,/^}/
+
+Must make sure other workers can run when one blocks.
+
+* A simple load balancer (3)
+
+The runner
+
+.code waza/load1 /Run/,/^}/
+
+Easy problem but also hard to solve concisely without concurrency.
+
+* Concurrency enables parallelism
+
+The load balancer is implicitly parallel and scalable.
+
+`NumWorkers` could be huge.
+
+The tools of concurrency make it almost trivial to build a safe, working, scalable, parallel design.
+
+* Concurrency simplifies synchronization
+
+No explicit synchronization needed.
+
+The structure of the program is implicitly synchronized.
+
+* That was too easy
+
+Let's do a more realistic load balancer.
+
+* Load balancer
+
+.image waza/gopherchart.jpg
+
+* Request definition
+
+The requester sends Requests to the balancer
+
+.code waza/load2 /^type.Request/,/^}/
+
+Note the return channel inside the request.
+Channels are first-class values.
+
+* Requester function
+
+An artificial but illustrative simulation of a requester, a load generator.
+
+.code waza/load2 /^func.requester/,/^}/
+
+* Worker definition
+
+A channel of requests, plus some load tracking data.
+
+.code waza/load2 /type.Worker/,/^}/
+
+* Worker
+
+Balancer sends request to most lightly loaded worker
+
+.code waza/load2 /^func.*work.*done/,/^}/
+
+The channel of requests (`w.requests`) delivers requests to each worker.  The balancer tracks the number of pending requests as a measure of load.
+Each response goes directly to its requester.
+
+Could run the loop body as a goroutine for parallelism.
+
+* Balancer definition
+
+The load balancer needs a pool of workers and a single channel to which requesters can report task completion.
+
+.code waza/load2 /type.Pool/,/^}/
+
+* Balancer function
+
+Easy!
+
+.code waza/load2 /func.*balance/,/^}/
+
+Just need to implement dispatch and completed.
+
+* A heap of channels
+
+Make Pool an implementation of the `Heap` interface by providing a few methods such as:
+
+.code waza/load2 /func.*Less/,/^}/
+
+Now we balance by making the `Pool` a heap tracked by load.
+
+* Dispatch
+
+All the pieces are in place.
+
+.code waza/load2 /Send.Request/,/^}/
+
+* Completed
+
+.code waza/load2 /Job.is.complete/,/^}/
+
+* Lesson
+
+A complex problem can be broken down into easy-to-understand components.
+
+The pieces can be composed concurrently.
+
+The result is easy to understand, efficient, scalable, and correct.
+
+Maybe even parallel.
+
+* Example 2: Query a Replicated Database
+
+* One more example
+
+We have a replicated database and want to minimize latency by asking them all and returning the first response to arrive.
+
+* Query a replicated database
+
+.code waza/snippets /func.Query/,/^}/
+Concurrent tools and garbage collection make this an easy solution to a subtle problem.
+
+(Teardown of late finishers is left as an exercise.)
+
+
+* Conclusion: Concurrency ≠ Parallelism
+
+Concurrency is powerful.
+
+Concurrency is not parallelism.
+
+Concurrency enables parallelism.
+
+Concurrency makes parallelism (and scaling and everything else) easy.
+
+
+* Conclusion : Don't overdue it.
+
+They're fun to play with, but don't overuse these ideas.
+
+Goroutines and channels are big ideas. They're tools for program construction.
+
+But sometimes all you need is a reference counter.
+
+Go has "sync" and "sync/atomic" packages that provide mutexes, condition variables, etc. They provide tools for smaller problems.
+
+Often, these things will work together to solve a bigger problem.
+
+Always use the right tool for the job.
+
+
+* Beyond Single Nodes
+
+* Beyond Single Nodes
+
+- Scaling an application over multiple cores only gets us so far.
+
+.image figures/40-years-processor-trend-2015.png 500 _
+
+* Beyond Single Nodes
+
+.image figures/free-lunch.png 400 _
+
+.caption Figure from [[https://herbsutter.com/welcome-to-the-jungle/][Herb Sutter (2012). Welcome to the Jungle]]
+
+* Beyond Single Nodes
+
+.image figures/scaling-cloud.png 400 _
+
+.caption Figure from [[https://herbsutter.com/welcome-to-the-jungle/][Herb Sutter (2012). Welcome to the Jungle]]
+
+* Beyond Single Nodes
+
+- Mainstream hardware is becoming permanently parallel, heterogeneous, and distributed.
+
+- Need to reduce synchronization needs (e.g., Hadoop, Spark).
+
+- Cannot synchronize through shared memory (distributed shared memory has turned out to be a dead end), need to to message parsing.
+
+=> CSP design pattern for concurrent programming is still a great fit.
+
+- goroutines are not bound to run on single node :-)
+
+
+* Hands On
+
+* Hands On
+
+*Note:* All instructions can be found at [[https://github.com/jf87/scalable_web_systems][https://github.com/jf87/scalable_web_systems]]
+
+TODO
+
+.image figures/gopherswrench.jpg _ 400
