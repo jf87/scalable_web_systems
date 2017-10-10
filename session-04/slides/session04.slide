@@ -82,13 +82,14 @@ Anyway:
 
 .image figures/process-states.png 400 _
 
+: Process is created and admitted to ready queue, then picked up by scheduler. It can be interrupted anytime => back to ready queue
+: or it might wait for some i/o event (disk, network access)
+
 
 * Process Switching
 
 .image figures/process-switching.png 600 _
 
-: Process is created and admitted to ready queue, then picked up by scheduler. It can be interrupted anytime => back to ready queue
-: or it might wait for some i/o event (disk, network access)
 
 * Problems with Structuring Application in Multiple Processes
 
@@ -153,7 +154,7 @@ Define a class that implements Runnable interface and call start() method.
 * Lesson
 
 - Processes and threads are fundamental OS abstraction that can enable concurrency.
-- Abstraction means always that they are not free; threads are cheaper than threads but still have overhead (e.g., memory allocation)
+- Abstraction means always that they are not free; threads are cheaper than processes but still have overhead (e.g., memory allocation)
 - We can use higher level APIs that support implicit thread creation and management.
 - But: Even if we use higher level abstractions, we need to understand these building blocks and their impact on performance.
 
@@ -182,6 +183,7 @@ The simultaneous execution of (possibly related) computations.
 
 *Concurrency*provides*a*way*to*structure*a*solution*to*solve*a*problem*that*may*(but*not*necessarily)*be*parallelizable.*
 
+: e.g., Concurrent: Mouse, keyboard, display, and disk drivers.
 
 * Concurrency Challenges
 
@@ -339,7 +341,7 @@ For a binary semaphore:
 Pitfalls:
 
 - Must "bind" semaphores to particular objects; must remember to unlock correctly
-- Mutex can only be unlocked by thread that locked it, semaphore can be signaled from any thread.
+- Mutex can only be unlocked by thread that locked it, semaphore can be signaled from any thread => used for synchronization.
 
 : wait/signal can be though as lock and unlock.
 : 
@@ -363,22 +365,22 @@ Pitfalls:
 Thread 1:
 
     void foo() {
-        sem.lock();
+        mutex.lock();
         x++;
         y = x;
-        sem.unlock();
+        mutex.unlock();
     }
 
 Thread 2:
 
     void bar() {
-        sem.lock();
+        mutex.lock();
         y++;
         x+=3;
-        sem.unlock();
+        mutex.unlock();
     }
 
-Global Semaphore "sem" guards access to x & y.
+Global mutex guards access to x & y.
 
 : Applying this to our example:
 : Ask: are there still any problems? (Yes – we still have two possible outcomes. We want some other system that allows us to serialize access on an event.
@@ -782,14 +784,14 @@ The `select` statement is like a `switch`, but the decision is based on ability 
 
 .code waza/snippets /select/,/}/
 
-* Closures are also part of the story
+# * Closures are also part of the story
 
-Make some concurrent calculations easier to express.
+# Make some concurrent calculations easier to express.
 
-They are just local functions.
-Here's a non-concurrent example:
+# They are just local functions.
+# Here's a non-concurrent example:
 
-.code waza/snippets /Compose/,/sin,/
+# .code waza/snippets /Compose/,/sin,/
 
 
 # * Example: Launching daemons
