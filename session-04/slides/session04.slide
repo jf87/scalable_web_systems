@@ -14,25 +14,27 @@ http://jofu.org/
 
 .image figures/40-years-processor-trend-2005.png 550 _
 
-: Moore’s law still holds (number of transistors)
-: Chip performance doubles every 18 months
+: Moore’s law (number of transistors doubles every 18 months)
+: => Chip performance doubles every 18 months
 : (being a combination of the effect of more transistors and the transistors being faster)
-
-: Physical limits
-: Slow down in processor clock speed
-
 
 * Bottleneck in Clock Speeds
 
 
 .image figures/40-years-processor-trend-2015.png 550 _
 
+: Physical limits
+: Slow down in processor clock speed
+
 * Consequences
 
-- Sequential programs don't scale anymore.
-- The scope of problems we can solve sequentially is not going to become larger the next foreseeable future.
-- Real world is concurrent and not sequential => should model program structure accordingly.
+- Sequential programs don't scale freely anymore.
+- The scope of problems we can solve sequentially is not going to become larger in the foreseeable future.
 - Need for multiple cores and distributed computing.
+
+Anyway:
+
+- The real world is complex and concurrent and not sequential => should model program structure accordingly.
 
 
 => Today we talk about how to deal with these changed conditions.
@@ -42,8 +44,7 @@ http://jofu.org/
 
 1. Processes and Threads
 
-- OS Basics
-- Synchronization Mechanisms
+- OS Basics & Synchronization Mechanisms
 
 2. Concurrency
 
@@ -53,33 +54,9 @@ http://jofu.org/
 
 5. Examples
 
-- Load Balancer
-- Query a Replicated Database
+- Load Balancer, Replicated Database
 
 6. Beyond Single Nodes
-
-
-
-# 1. Concurrency Concepts
-
-# - Concurrency Basics
-# - Mutex
-# - Semaphores
-
-# 2. Concurrency Patterns
-# - Barrier
-# - Monitors
-# - Message Parsing
-# - Thread Pool
-# - Producer-Consumer
-
-# 2. Web and Concurrency
-
-# 3. Go Concurrency Concepts
-
-# - Goroutines and channels
-# - 'sync' package
-
 
 
 * Processes and Threads
@@ -110,6 +87,12 @@ http://jofu.org/
 
 .image figures/process-switching.png 600 _
 
+: Process is created and admitted to ready queue, then picked up by scheduler. It can be interrupted anytime => back to ready queue
+: or it might wait for some i/o event (disk, network access)
+
+* Problems with Structuring Application in Multiple Processes
+
+Why might this be tricky?
 
 * Problems with Structuring Application in Multiple Processes
 
@@ -121,6 +104,13 @@ http://jofu.org/
 or
 
 (b) Shared memory
+
+ 
+On the other hand:
+
+If processes are independent, then we have an embarrassingly parallel workload, e.g.,:
+
+- 3D video rendering (each frame/pixes can be handled with no interdependence)
 
 
 * Interprocess Communication
@@ -156,14 +146,24 @@ Define a class that implements Runnable interface and call start() method.
 
 - See [[https://docs.oracle.com/javase/tutorial/essential/concurrency/runthread.html][Java Tutorial]] on threads.
 - [[https://docs.oracle.com/javase/8/docs/api/index.html?java/util/concurrent/package-summary.html][java.util.concurrent]] supports implicit thread creation and management.
+- Android: [[https://developer.android.com/reference/android/os/Handler.html][Handler]] or [[https://developer.android.com/reference/android/os/AsyncTask.html][AsyncTask]].
+
+: Which one did you use?
 
 * Lesson
 
-- Processes and threads are fundamental OS abstraction.
+- Processes and threads are fundamental OS abstraction that can enable concurrency.
+- Abstraction means always that they are not free; threads are cheaper than threads but still have overhead (e.g., memory allocation)
 - We can use higher level APIs that support implicit thread creation and management.
 - But: Even if we use higher level abstractions, we need to understand these building blocks and their impact on performance.
 
 * Concurrency
+
+* Concurrency vs. Parallelism
+
+What is the difference?
+
+Or is there any difference?
 
 * Concurrency ≠ Parallelism
 
@@ -186,23 +186,18 @@ The simultaneous execution of (possibly related) computations.
 * Concurrency Challenges
 
 1. Identify Tasks:
-
 - Identify areas that can be divided into concurrent tasks (ideally independent).
 
 2. Balance:
-
 - Tasks should perform equal work of equal value.
 
 3. Data Splitting:
-
 - How to split data that is accessed by separate tasks?
 
 4. Data Dependency:
-
 - If data dependencies between different tasks => *Synchronization*needed*.
 
 5. Testing and Debugging:
-
 - Many different execution paths possible, testing & debugging become more difficult.
 
 
@@ -258,7 +253,6 @@ When we run a multithreaded program, we don’t know what order threads run in, 
 : What is the name for this issue?
 
 
-
 * Multithreaded = Unpredictability
 
 This applies to more than just integers:
@@ -267,7 +261,7 @@ This applies to more than just integers:
 - Reporting work back to master unit
 - Telling another thread that it can begin the “next phase” of processing
 
-=> All require synchronization!
+=> All require *synchronization*!
 
 
 : Applies to higher level data structures as well
@@ -331,7 +325,7 @@ Unlock unlocks m. It is a run-time error if m is not locked on entry to Unlock.
 : How does this relate to computer science?
 : 
 : Only one side of the semaphore can ever be red! (Can both be green?)
-
+: TODO revise train example
 
 * Synchronization Primitives : Semaphore
 
@@ -344,7 +338,7 @@ For a binary semaphore:
 
 Pitfalls:
 
-- Must “bind” semaphores to particular objects; must remember to unlock correctly
+- Must "bind" semaphores to particular objects; must remember to unlock correctly
 - Mutex can only be unlocked by thread that locked it, semaphore can be signaled from any thread.
 
 : wait/signal can be though as lock and unlock.
@@ -364,7 +358,7 @@ Pitfalls:
 : 
 : Going back to example...
 
-* The “corrected” example
+* The "corrected" example
 
 Thread 1:
 
@@ -384,7 +378,7 @@ Thread 2:
         sem.unlock();
     }
 
-Global var “Semaphore sem = new Semaphore();” guards access to x & y
+Global Semaphore "sem" guards access to x & y.
 
 : Applying this to our example:
 : Ask: are there still any problems? (Yes – we still have two possible outcomes. We want some other system that allows us to serialize access on an event.
@@ -431,9 +425,9 @@ Global var “Semaphore sem = new Semaphore();” guards access to x & y
         sem.unlock();
     }
 
-Global vars: Semaphore sem = new Semaphore();
-ConditionVar fooFinishedCV = new ConditionVar();
-boolean fooDone = false;
+Global vars: sem Semaphore
+fooFinishedCV ConditionVar
+fooDone := false
 
 : In our example, notify when foo has finished so that bar can continue.
 : 
@@ -483,11 +477,13 @@ Origins:
 
 * Communicating Sequential Processes (CSP)
 
-- TODO: main points and insight of Hoare's paper.
+- Input and output are basic primitives of programming and parallel composition of communicating sequential processes is a fundamental program structuring method.
+
+Main insight:
 
 - Don't communicate by sharing memory, share memory by communicating.
 
-- Erlang is more pure CSP
+[[http://www.erlang.org/][Erlang]] is another "popular" language that is more pure CSP.
 
 * Gophers
 
@@ -509,7 +505,19 @@ With only one gopher this will take too long.
 
 .image waza/gophersimple3.jpg
 
+And now?
+
+* More gophers!
+
+.image waza/gophersimple3.jpg
+
 More gophers are not enough; they need more carts.
+
+* More gophers and more carts
+
+.image waza/gophersimple2.jpg
+
+All fine?
 
 * More gophers and more carts
 
@@ -534,7 +542,7 @@ The concurrent composition of two gopher procedures.
 
 * Concurrent composition
 
-This design is not automatically parallel!
+This design is *not*automatically*parallel!*
 
 What if only one gopher is moving at a time?
 Then it's still concurrent (that's in the design), just not parallel.
@@ -561,6 +569,8 @@ Four gophers in action for better flow, each doing one simple task.
 
 If we arrange everything right (implausible but not impossible), that's four times faster than our original one-gopher design.
 
+: actually faster than before, even we do more work (another gopher)
+
 * Observation
 
 We improved performance by adding a concurrent procedure to the existing design.
@@ -568,6 +578,8 @@ We improved performance by adding a concurrent procedure to the existing design.
 More gophers doing more work; it runs better.
 
 This is a deeper insight than mere parallelism.
+
+: we added more things to the design, but made things faster
 
 * Concurrent procedures
 
@@ -586,11 +598,15 @@ We can now parallelize on the other axis; the concurrent design makes it easy. E
 
 .image waza/gophercomplex2.jpg
 
+: as soon as we understand the concurrent design, we can parallelize on different axes
+
 * Or maybe no parallelization at all
 
 Keep in mind, even if only one gopher is active at a time (zero parallelism), it's still a correct and concurrent solution.
 
 .image waza/gophercomplex2.jpg
+
+: don't need to worry about parallelism if we have concurrent design
 
 * Another design
 
@@ -599,6 +615,8 @@ Here's another way to structure the problem as the concurrent composition of gop
 Two gopher procedures, plus a staging pile.
 
 .image waza/gophercomplex3.jpg
+
+: different design, but possibly also twice as fast
 
 * Parallelize the usual way
 
@@ -617,6 +635,9 @@ Bring the staging pile to the multi-gopher concurrent model:
 Use all our techniques. Sixteen gophers hard at work!
 
 .image waza/gophercomplex6.jpg
+
+: main point, you don't think how to run in parallel, but how to compose problem in independent activities.
+
 
 * Lesson
 
@@ -638,7 +659,6 @@ In our book transport problem, substitute:
 
 It becomes a concurrent design for a scalable web service.
 Gophers serving web content.
-
 
 
 * Concurrency in Go: Goroutines and Channels
@@ -673,6 +693,8 @@ The functionality is analogous to the & on the end of a shell command.
 
 .play concurrency/support/goboring.go 1,/^}/
 
+: ampersand
+
 * Ignoring it a little less
 
 When main returns, the program exits and takes the boring function down with it.
@@ -700,14 +722,8 @@ But if you think of it as a very cheap thread, you won't be far off.
 
 : Go really supports concurrency
 : 
-: Really.
-: 
-: It's routine to create thousands of goroutines in one program.
-: (Once debugged a program after it had created 1.3 million.)
-: 
-: Stacks start small, but grow and shrink as required.
-: 
 : Goroutines aren't free, but they're very cheap.
+: Question: What's missing from previous example?
 
 
 * Communication
@@ -744,11 +760,11 @@ Similarly, when the boring function executes c <– value, it waits for a receiv
 
 A sender and receiver must both be ready to play their part in the communication. Otherwise we wait until they are.
 
-Thus channels both communicate and synchronize.
+Thus channels both *communicate*and*synchronize*.
 
 * An aside about buffered channels
 
-Note for experts: Go channels can also be created with a buffer.
+Go channels can also be created with a buffer.
 
 Buffering removes synchronization.
 
@@ -756,8 +772,15 @@ Buffering makes them more like Erlang's mailboxes.
 
 Buffered channels can be important for some problems but they are more subtle to reason about.
 
-We won't need them today.
+    ch := make(chan int)    // unbuffered channel
+    ch := make(chan int, 0) // unbuffered channel
+    ch := make(chan int, 3) // buffered channel with capacity 3
 
+* Select
+
+The `select` statement is like a `switch`, but the decision is based on ability to communicate rather than equal values.
+
+.code waza/snippets /select/,/}/
 
 * Closures are also part of the story
 
@@ -769,17 +792,15 @@ Here's a non-concurrent example:
 .code waza/snippets /Compose/,/sin,/
 
 
-# Learn concurrent Go by osmosis.
+# * Example: Launching daemons
 
-* Example: Launching daemons
+# Use a closure to wrap a background operation.
 
-Use a closure to wrap a background operation.
+# This copies items from the input channel to the output channel:
 
-This copies items from the input channel to the output channel:
+# .code waza/snippets /copy.input/,/^}/
 
-.code waza/snippets /copy.input/,/^}/
-
-The `for` `range` operation runs until channel is drained.
+# The `for` `range` operation runs until channel is drained.
 
 * Example 1: Load Balancer
 
@@ -815,13 +836,22 @@ The tools of concurrency make it almost trivial to build a safe, working, scalab
 
 * Concurrency simplifies synchronization
 
-No explicit synchronization needed.
+No explicit synchronization needed (locking, mutexes...).
 
 The structure of the program is implicitly synchronized.
 
 * That was too easy
 
 Let's do a more realistic load balancer.
+
+* Load balancer
+
+- We have many processes requesting actions and few workers that share the load.
+- We want a load balancer that distributes the work fairly across workers according to current workload.
+
+Principled way of working:
+
+Requester makes Request => Load Balancer => Worker => Requester
 
 * Load balancer
 
@@ -834,7 +864,7 @@ The requester sends Requests to the balancer
 .code waza/load2 /^type.Request/,/^}/
 
 Note the return channel inside the request.
-Channels are first-class values.
+Channels are first-class values => can pass them around.
 
 * Requester function
 
@@ -854,10 +884,11 @@ Balancer sends request to most lightly loaded worker
 
 .code waza/load2 /^func.*work.*done/,/^}/
 
-The channel of requests (`w.requests`) delivers requests to each worker.  The balancer tracks the number of pending requests as a measure of load.
+The channel of requests (`w.requests`) delivers requests to each worker.
+The balancer tracks the number of pending requests as a measure of load.
 Each response goes directly to its requester.
 
-Could run the loop body as a goroutine for parallelism.
+# Could run the loop body as a goroutine for parallelism.
 
 * Balancer definition
 
@@ -875,11 +906,15 @@ Just need to implement dispatch and completed.
 
 * A heap of channels
 
-Make Pool an implementation of the `Heap` interface by providing a few methods such as:
+Make Pool an implementation of the `Heap` interface by providing a few methods (len, push, pop, swap, less) e.g., such as:
 
 .code waza/load2 /func.*Less/,/^}/
 
 Now we balance by making the `Pool` a heap tracked by load.
+
+Remember, in each worker we keep a count on pending operations:
+
+.code waza/load2 /type.Worker/,/^}/
 
 * Dispatch
 
@@ -900,8 +935,6 @@ The pieces can be composed concurrently.
 The result is easy to understand, efficient, scalable, and correct.
 
 Maybe even parallel.
-
-* Example 2: Query a Replicated Database
 
 * One more example
 
@@ -978,8 +1011,9 @@ Always use the right tool for the job.
 
 * Hands On
 
-*Note:* All instructions can be found at [[https://github.com/jf87/scalable_web_systems][https://github.com/jf87/scalable_web_systems]]
 
-TODO
+- Some exercise on concurrency: a concurrent URL checker.
+
+*Note:* All instructions can be found at [[https://github.com/jf87/scalable_web_systems][https://github.com/jf87/scalable_web_systems]]
 
 .image figures/gopherswrench.jpg _ 400
