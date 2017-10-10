@@ -28,14 +28,14 @@ presents Go's CSP concept using several examples in Go.
 
 1. What is the difference (besides the syntax) of the concurrency model
    presented in Hoare's paper and the one implemented in Go?
-
+2. Investigate how the HTTP server in Go is implemented. How does it handle multiple requests?
 
 ## Hands-on
 
-1. [Hands-on-01](hands-on-01/README.md) TODO
+1. [Hands-on-01](hands-on-01/README.md)
 
 
-## Further Reads
+## Further Readings
 
 - [Herb Sutter (2005). The Free Lunch Is Over: A Fundamental Turn Toward Concurrency in Software](http://www.gotw.ca/publications/concurrency-ddj.htm)
 - [Herb Sutter (2012). Welcome to the Jungle](https://herbsutter.com/welcome-to-the-jungle/)
