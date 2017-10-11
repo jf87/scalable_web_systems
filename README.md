@@ -18,6 +18,11 @@ by the teachers.
 06. Maintenance and Deployment
 
 
+## Assignments
+
+01. [Assignment 01](assignment-01)
+
+
 ## Useful Links
 
 - [Go Wiki](https://github.com/golang/go/wiki)
