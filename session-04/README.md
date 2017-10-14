@@ -39,3 +39,11 @@ presents Go's CSP concept using several examples in Go.
 
 - [Herb Sutter (2005). The Free Lunch Is Over: A Fundamental Turn Toward Concurrency in Software](http://www.gotw.ca/publications/concurrency-ddj.htm)
 - [Herb Sutter (2012). Welcome to the Jungle](https://herbsutter.com/welcome-to-the-jungle/)
+
+### On Concurrency in Go
+
+- https://blog.golang.org/context
+- https://blog.golang.org/pipelines
+- https://blog.golang.org/advanced-go-concurrency-patterns
+- https://blog.golang.org/share-memory-by-communicating
+- https://blog.golang.org/go-concurrency-patterns-timing-out-and
