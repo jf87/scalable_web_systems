@@ -14,7 +14,7 @@ by the teachers.
 02. [Web Programming in Go](session-02)
 03. [Database Backend](session-03)
 04. [Concurrency](session-04)
-05. Debugging, Testing, Profiling, Tracing
+05. [Debugging, Testing, Profiling, Tracing](session-05)
 06. Maintenance and Deployment
 
 
