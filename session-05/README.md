@@ -19,7 +19,7 @@ program performance in the hands-on part.
 - Testing
 - Tools: Debugging, Tracing, Profiling
 
-## [Slides](http://...)
+## [Slides](slides/05-Correctness.pdf)
 
 ## Readings
 - Go Web Programming chapter 9
