@@ -21,6 +21,7 @@ by the teachers.
 ## Assignments
 
 01. [Assignment 01](assignment-01)
+02. [Assignment 02](assignment-02)
 
 
 ## Useful Links
