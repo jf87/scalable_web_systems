@@ -4,7 +4,7 @@ C library (http://www.openjpeg.org/) that can be used from Go programs using [cg
 but this is not possible on AppEngine (it's only possible for local Go programs).  
 
 For this assignment, it is therefore Ok to only describe your design (trade-offs, design decisions etc.)
-for the color related part in your report. E.g., you could assume that you have a library to process jpeg2000 images in Go.
+for the color related part in your report (implementation is optional). E.g., you could assume that you have a library to process jpeg2000 images in Go.
 
 If you can figure out a way to process the images in Go or derive the necessary color information otherwise,
 you are still very welcome to implement it and report it!
