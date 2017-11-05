@@ -37,5 +37,7 @@ program performance in the hands-on part.
 
 ## Further Readings
 
+- [Principles of Chaos Engineering](http://principlesofchaos.org/)
+
 
 *From Francesc's [go-tooling-workshop](https://github.com/campoy/go-tooling-workshop)
