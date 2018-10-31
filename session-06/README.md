@@ -12,7 +12,7 @@ This session deals with deployment and maintenance in web systems.
 - In Practice: Google & Netflix
 
 
-## [Slides]()
+## [Slides](https://docs.google.com/presentation/d/1htr3TZeE9WHxJOSs7x8i8B3Hgr6-cEqNThy3nMxjL7M/edit?usp=sharing)
 
 ## Readings
 - Go Web Programming chapter 10
